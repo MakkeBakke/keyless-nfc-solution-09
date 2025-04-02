@@ -7,7 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface AddKeyModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onAdd: (keyName: string, keyType: string) => void;
+  onAdd: (keyName: string) => void;
 }
 
 const AddKeyModal = ({ isOpen, onClose, onAdd }: AddKeyModalProps) => {
@@ -17,8 +17,7 @@ const AddKeyModal = ({ isOpen, onClose, onAdd }: AddKeyModalProps) => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyName.trim()) {
-      // Always use 'Smart Lock' as the default type
-      onAdd(keyName, 'Smart Lock');
+      onAdd(keyName);
       setKeyName('');
       onClose();
     }

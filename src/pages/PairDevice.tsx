@@ -17,6 +17,9 @@ const PairDevice = () => {
   const [pairingSuccess, setPairingSuccess] = useState<boolean | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
+  const [nfcPermissionGranted, setNfcPermissionGranted] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   
   useEffect(() => {
     // Check if user is authenticated
@@ -29,21 +32,127 @@ const PairDevice = () => {
     };
     
     checkSession();
+    checkNfcSupport();
   }, []);
+  
+  const checkNfcSupport = async () => {
+    try {
+      if (!('NDEFReader' in window)) {
+        console.log('Web NFC API is not supported in this browser');
+        setNfcSupported(false);
+        return;
+      }
+      
+      setNfcSupported(true);
+    } catch (error) {
+      console.error('Error checking NFC support:', error);
+      setNfcSupported(false);
+    }
+  };
+  
+  const requestNfcPermission = async () => {
+    if (!nfcSupported) return;
+    
+    try {
+      // @ts-ignore - NDEFReader might not be recognized by TypeScript
+      const ndef = new NDEFReader();
+      await ndef.scan();
+      setNfcPermissionGranted(true);
+      return true;
+    } catch (error) {
+      console.error('Error requesting NFC permission:', error);
+      setNfcPermissionGranted(false);
+      if ((error as Error).name === 'NotAllowedError') {
+        setErrorMessage('NFC permission denied. Please enable NFC permissions and try again.');
+      } else if ((error as Error).name === 'NotSupportedError') {
+        setErrorMessage('NFC is not supported on this device.');
+      } else {
+        setErrorMessage('Error accessing NFC. Please make sure NFC is enabled on your device.');
+      }
+      return false;
+    }
+  };
   
   useEffect(() => {
     if (step === 2 && scanning) {
-      const timer = setTimeout(() => {
-        setScanning(false);
-        setPairingSuccess(Math.random() > 0.2); // 80% success chance for demo
-        setStep(3);
-      }, 3000);
+      let nfcTimeout: NodeJS.Timeout;
+      let nfcDetected = false;
       
-      return () => clearTimeout(timer);
+      const scanForNfc = async () => {
+        try {
+          if (!nfcSupported) {
+            // Simulate scanning for demo purposes if NFC not supported
+            nfcTimeout = setTimeout(() => {
+              setScanning(false);
+              setPairingSuccess(Math.random() > 0.2); // 80% success chance for demo
+              setStep(3);
+            }, 3000);
+            return;
+          }
+          
+          // Real NFC scanning
+          // @ts-ignore - NDEFReader might not be recognized by TypeScript
+          const ndef = new NDEFReader();
+          
+          ndef.addEventListener("reading", (event: any) => {
+            console.log("NFC tag detected!");
+            console.log("Serial number:", event.serialNumber);
+            
+            // Successfully read an NFC tag
+            nfcDetected = true;
+            setScanning(false);
+            setPairingSuccess(true);
+            setStep(3);
+          });
+          
+          ndef.addEventListener("error", (error: any) => {
+            console.error(`NFC Error: ${error.message}`);
+            if (!nfcDetected) {
+              setScanning(false);
+              setPairingSuccess(false);
+              setStep(3);
+            }
+          });
+          
+          await ndef.scan();
+          
+          // Set a timeout for the scanning process
+          nfcTimeout = setTimeout(() => {
+            if (!nfcDetected) {
+              setScanning(false);
+              setPairingSuccess(false);
+              setStep(3);
+            }
+          }, 10000); // 10 seconds timeout
+          
+        } catch (error) {
+          console.error('Error scanning for NFC:', error);
+          setScanning(false);
+          setPairingSuccess(false);
+          setStep(3);
+        }
+      };
+      
+      scanForNfc();
+      
+      return () => {
+        if (nfcTimeout) clearTimeout(nfcTimeout);
+      };
     }
-  }, [step, scanning]);
+  }, [step, scanning, nfcSupported]);
   
-  const startScanning = () => {
+  const startScanning = async () => {
+    setErrorMessage(null);
+    
+    // Request NFC permission if supported
+    if (nfcSupported && !nfcPermissionGranted) {
+      const permissionGranted = await requestNfcPermission();
+      if (!permissionGranted) {
+        // Don't proceed if permission was denied
+        return;
+      }
+    }
+    
     setScanning(true);
   };
   
@@ -51,6 +160,7 @@ const PairDevice = () => {
     setStep(1);
     setScanning(false);
     setPairingSuccess(null);
+    setErrorMessage(null);
   };
   
   const finishPairing = () => {
@@ -62,7 +172,7 @@ const PairDevice = () => {
     }
   };
   
-  const handleAddKey = async (keyName: string, keyType: string) => {
+  const handleAddKey = async (keyName: string) => {
     if (!userId) {
       // Redirect to profile for login/signup
       navigate('/profile');
@@ -75,7 +185,7 @@ const PairDevice = () => {
         .from('keys')
         .insert({
           name: keyName,
-          type: keyType,
+          type: 'Smart Lock',
           user_id: userId,
           battery_level: 100,
           is_active: true,
@@ -170,6 +280,16 @@ const PairDevice = () => {
                 : t('couldNotDetectDevice')
               )}
             </p>
+            
+            {errorMessage && (
+              <p className="text-red-500 mt-2 text-sm">{errorMessage}</p>
+            )}
+            
+            {nfcSupported === false && step === 1 && (
+              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
+                <p>Your device doesn't support NFC or the browser doesn't have access to NFC capabilities. A simulation mode will be used for demonstration purposes.</p>
+              </div>
+            )}
           </div>
           
           {step === 1 && (
