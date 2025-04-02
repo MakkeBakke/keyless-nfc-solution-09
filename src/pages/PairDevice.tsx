@@ -4,12 +4,32 @@ import { useNavigate } from 'react-router-dom';
 import { Nfc, CheckCircle, XCircle } from 'lucide-react';
 import Header from '@/components/Header';
 import { cn } from '@/lib/utils';
+import AddKeyModal from '@/components/AddKeyModal';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from '@/hooks/use-toast';
 
 const PairDevice = () => {
   const navigate = useNavigate();
+  const { t } = useLanguage();
   const [step, setStep] = useState(1);
   const [scanning, setScanning] = useState(false);
   const [pairingSuccess, setPairingSuccess] = useState<boolean | null>(null);
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
+  
+  useEffect(() => {
+    // Check if user is authenticated
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (session) {
+        setUserId(session.user.id);
+      }
+    };
+    
+    checkSession();
+  }, []);
   
   useEffect(() => {
     if (step === 2 && scanning) {
@@ -34,12 +54,69 @@ const PairDevice = () => {
   };
   
   const finishPairing = () => {
-    navigate('/');
+    // Only show the add key modal if pairing was successful
+    if (pairingSuccess) {
+      setShowAddModal(true);
+    } else {
+      navigate('/');
+    }
+  };
+  
+  const handleAddKey = async (keyName: string, keyType: string) => {
+    if (!userId) {
+      // Redirect to profile for login/signup
+      navigate('/profile');
+      return;
+    }
+    
+    try {
+      // Insert new key into database
+      const { data, error } = await supabase
+        .from('keys')
+        .insert({
+          name: keyName,
+          type: keyType,
+          user_id: userId,
+          battery_level: 100,
+          is_active: true,
+          is_locked: true
+        })
+        .select()
+        .single();
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Log activity
+      await supabase
+        .from('key_activity')
+        .insert({
+          key_id: data.id,
+          user_id: userId,
+          action: 'create'
+        });
+      
+      toast({
+        title: t('keyAdded'),
+        description: `${keyName} ${t('hasBeenAddedToYourKeys')}`,
+      });
+      
+      // Navigate back to the home page
+      navigate('/');
+    } catch (error) {
+      console.error('Error adding key:', error);
+      toast({
+        title: t('error'),
+        description: t('failedToAddKey'),
+        variant: "destructive",
+      });
+    }
   };
   
   return (
     <div className="min-h-screen pb-24 pt-24 px-4">
-      <Header title="Pair Device" showBackButton />
+      <Header title={t('pairDevice')} showBackButton />
       
       <div className="max-w-md mx-auto">
         <div className="glass-card p-6 animate-fade-in">
@@ -81,16 +158,16 @@ const PairDevice = () => {
           
           <div className="text-center mb-8">
             <h2 className="text-2xl font-medium mb-2">
-              {step === 1 && "Pair New Device"}
-              {step === 2 && "Scanning..."}
-              {step === 3 && (pairingSuccess ? "Pairing Successful" : "Pairing Failed")}
+              {step === 1 && t('pairNewDevice')}
+              {step === 2 && t('scanning')}
+              {step === 3 && (pairingSuccess ? t('pairingSuccessful') : t('pairingFailed'))}
             </h2>
             <p className="text-axiv-gray">
-              {step === 1 && "Pair your NFC-compatible device with Axiv"}
-              {step === 2 && "Hold your NFC device near your phone"}
+              {step === 1 && t('pairYourNFCDevice')}
+              {step === 2 && t('holdNFCDeviceNearPhone')}
               {step === 3 && (pairingSuccess 
-                ? "Your device has been successfully paired"
-                : "We couldn't detect your device. Please try again."
+                ? t('deviceSuccessfullyPaired')
+                : t('couldNotDetectDevice')
               )}
             </p>
           </div>
@@ -98,19 +175,19 @@ const PairDevice = () => {
           {step === 1 && (
             <div className="space-y-4">
               <div className="bg-axiv-light-gray p-4 rounded-xl">
-                <h3 className="font-medium mb-2">Before you start:</h3>
+                <h3 className="font-medium mb-2">{t('beforeYouStart')}:</h3>
                 <ul className="text-sm space-y-2">
                   <li className="flex items-start">
                     <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">1</span>
-                    Make sure your NFC device is activated
+                    {t('makeNFCDeviceActivated')}
                   </li>
                   <li className="flex items-start">
                     <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">2</span>
-                    Enable NFC on your phone
+                    {t('enableNFCOnPhone')}
                   </li>
                   <li className="flex items-start">
                     <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">3</span>
-                    Hold the device close to your phone during scanning
+                    {t('holdDeviceCloseToPhone')}
                   </li>
                 </ul>
               </div>
@@ -122,7 +199,7 @@ const PairDevice = () => {
                 }}
                 className="w-full py-3 bg-axiv-blue text-white rounded-xl hover:bg-axiv-blue/90 transition-colors"
               >
-                Start Pairing
+                {t('startPairing')}
               </button>
             </div>
           )}
@@ -130,7 +207,7 @@ const PairDevice = () => {
           {step === 2 && (
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-axiv-blue border-t-transparent mb-4"></div>
-              <p className="text-sm text-axiv-gray">This may take a few moments...</p>
+              <p className="text-sm text-axiv-gray">{t('mayTakeAFewMoments')}</p>
             </div>
           )}
           
@@ -141,14 +218,14 @@ const PairDevice = () => {
                   onClick={finishPairing}
                   className="w-full py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors"
                 >
-                  Continue
+                  {t('continue')}
                 </button>
               ) : (
                 <button 
                   onClick={resetPairing}
                   className="w-full py-3 bg-axiv-blue text-white rounded-xl hover:bg-axiv-blue/90 transition-colors"
                 >
-                  Try Again
+                  {t('tryAgain')}
                 </button>
               )}
               
@@ -156,12 +233,18 @@ const PairDevice = () => {
                 onClick={() => navigate('/')}
                 className="w-full py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
               >
-                Cancel
+                {t('cancel')}
               </button>
             </div>
           )}
         </div>
       </div>
+      
+      <AddKeyModal
+        isOpen={showAddModal}
+        onClose={() => navigate('/')}
+        onAdd={handleAddKey}
+      />
     </div>
   );
 };
