@@ -1,3 +1,4 @@
+
 export default {
   // General
   error: '错误',
@@ -146,7 +147,7 @@ export default {
   unlockEvents: '解锁事件',
   receiveNotificationWhenKeyIsUnlocked: '当钥匙解锁时接收通知',
   lockEvents: '锁定事件',
-  receiveNotificationWhenKeyIsLocked: '当钥匙锁定时接收通知',
+  receiveNotificationWhenKeyIsLocked: '当钥匙锁定时通知我',
   permissionChanges: '权限变更',
   notifyWhenPermissionChanges: '当权限变更时通知我',
   lowBattery: '电池电量低',

@@ -1,31 +1,18 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { UserPlus, UserCheck, ChevronRight, ArrowLeft, Trash, X, Mail } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { UserPlus } from 'lucide-react';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
-
-// Define the permission type based on the database structure
-interface KeyPermission {
-  id: string;
-  key_id: string;
-  user_id: string;
-  user_email: string;
-  user_name: string;
-  can_unlock: boolean;
-  can_lock: boolean;
-  can_view_history: boolean;
-}
+import PermissionItem from '@/components/PermissionItem';
+import InviteUserDialog from '@/components/InviteUserDialog';
+import { KeyPermission, fetchKeyPermissions } from '@/utils/permissionUtils';
 
 const KeyPermissions = () => {
   const { id } = useParams<{ id: string }>();
@@ -36,12 +23,6 @@ const KeyPermissions = () => {
   const [keyData, setKeyData] = useState<any>(null);
   const [permissions, setPermissions] = useState<KeyPermission[]>([]);
   const [userId, setUserId] = useState<string | null>(null);
-  const [inviteEmail, setInviteEmail] = useState('');
-  const [inviteName, setInviteName] = useState('');
-  const [canUnlock, setCanUnlock] = useState(true);
-  const [canLock, setCanLock] = useState(true);
-  const [canViewHistory, setCanViewHistory] = useState(false);
-  const [isSending, setIsSending] = useState(false);
   const [allowInvitations, setAllowInvitations] = useState(true);
   const [requireApproval, setRequireApproval] = useState(false);
 
@@ -89,22 +70,18 @@ const KeyPermissions = () => {
           setKeyData(data);
         }
         
-        // Fetch permissions from database
-        const { data: permissionsData, error: permissionsError } = await supabase
-          .from('key_permissions')
-          .select('*')
-          .eq('key_id', id);
-          
-        if (permissionsError) {
-          console.error('Error fetching permissions:', permissionsError);
+        // Fetch permissions from database using our utility function
+        try {
+          const permissionsData = await fetchKeyPermissions(id);
+          setPermissions(permissionsData);
+        } catch (error) {
+          console.error('Error fetching permissions:', error);
           toast({
             title: t('error'),
             description: t('failedToLoadPermissions'),
             variant: "destructive",
           });
           setPermissions([]);
-        } else {
-          setPermissions(permissionsData || []);
         }
       } catch (error) {
         console.error('Error:', error);
@@ -121,129 +98,18 @@ const KeyPermissions = () => {
     fetchKeyData();
   }, [id, userId, t]);
   
-  const handleInviteUser = async () => {
-    if (!inviteEmail || !id || !userId) return;
-    
-    setIsSending(true);
-    
-    try {
-      // Check if user already has permission
-      const existingPermission = permissions.find(p => p.user_email === inviteEmail);
-      
-      if (existingPermission) {
-        toast({
-          title: t('error'),
-          description: t('userAlreadyHasAccess'),
-          variant: "destructive",
-        });
-      } else {
-        // Add new permission to database
-        const newPermission = {
-          key_id: id,
-          user_id: 'generated-id-' + Date.now(), // Simulate a user ID
-          user_email: inviteEmail,
-          user_name: inviteName || inviteEmail.split('@')[0],
-          can_unlock: canUnlock,
-          can_lock: canLock,
-          can_view_history: canViewHistory
-        };
-        
-        const { data, error } = await supabase
-          .from('key_permissions')
-          .insert(newPermission)
-          .select();
-        
-        if (error) {
-          throw error;
-        }
-        
-        toast({
-          title: t('invitationSent'),
-          description: t('userWillReceiveEmail'),
-        });
-        
-        // Add the new permission to the state
-        if (data && data.length > 0) {
-          setPermissions(prev => [...prev, data[0]]);
-        }
-        
-        // Clear the form
-        setInviteEmail('');
-        setInviteName('');
-        setIsInviteModalOpen(false);
-      }
-    } catch (error) {
-      console.error('Error inviting user:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToInviteUser'),
-        variant: "destructive",
-      });
-    } finally {
-      setIsSending(false);
-    }
+  const handlePermissionUpdate = (updatedPermission: KeyPermission) => {
+    setPermissions(prev => 
+      prev.map(p => p.id === updatedPermission.id ? updatedPermission : p)
+    );
   };
   
-  const handleUpdatePermission = async (permission: KeyPermission, field: keyof KeyPermission, value: boolean) => {
-    try {
-      const updatedPermission = { ...permission, [field]: value };
-      
-      // Update permission in database
-      const { error } = await supabase
-        .from('key_permissions')
-        .update({ [field]: value })
-        .eq('id', permission.id);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Update permission in state
-      setPermissions(prev => 
-        prev.map(p => p.id === permission.id ? updatedPermission : p)
-      );
-      
-      toast({
-        title: t('permissionUpdated'),
-        description: t('userPermissionsHaveBeenUpdated'),
-      });
-    } catch (error) {
-      console.error('Error updating permission:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToUpdatePermission'),
-        variant: "destructive",
-      });
-    }
+  const handlePermissionRemove = (permissionId: string) => {
+    setPermissions(prev => prev.filter(p => p.id !== permissionId));
   };
   
-  const handleRemovePermission = async (permissionId: string) => {
-    try {
-      // Remove permission from database
-      const { error } = await supabase
-        .from('key_permissions')
-        .delete()
-        .eq('id', permissionId);
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Remove permission from state
-      setPermissions(prev => prev.filter(p => p.id !== permissionId));
-      
-      toast({
-        title: t('accessRemoved'),
-        description: t('userAccessRemoved'),
-      });
-    } catch (error) {
-      console.error('Error removing permission:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToRemoveAccess'),
-        variant: "destructive",
-      });
-    }
+  const handleInviteSuccess = (newPermission: KeyPermission) => {
+    setPermissions(prev => [...prev, newPermission]);
   };
 
   if (loading) {
@@ -309,51 +175,12 @@ const KeyPermissions = () => {
         ) : (
           <div className="glass-card mb-4 p-0 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
             {permissions.map((permission) => (
-              <div 
-                key={permission.id} 
-                className="p-4 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
-              >
-                <div className="flex items-start justify-between mb-3">
-                  <div>
-                    <h3 className="font-medium dark:text-white">{permission.user_name}</h3>
-                    <p className="text-sm text-axiv-gray dark:text-gray-400">{permission.user_email}</p>
-                  </div>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => handleRemovePermission(permission.id)}
-                    className="text-red-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 p-2 h-8 w-8"
-                  >
-                    <Trash size={16} />
-                  </Button>
-                </div>
-                
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm dark:text-gray-300">{t('canUnlock')}</p>
-                    <Switch 
-                      checked={permission.can_unlock}
-                      onCheckedChange={(checked) => handleUpdatePermission(permission, 'can_unlock', checked)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm dark:text-gray-300">{t('canLock')}</p>
-                    <Switch 
-                      checked={permission.can_lock}
-                      onCheckedChange={(checked) => handleUpdatePermission(permission, 'can_lock', checked)}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center justify-between">
-                    <p className="text-sm dark:text-gray-300">{t('canViewHistory')}</p>
-                    <Switch 
-                      checked={permission.can_view_history}
-                      onCheckedChange={(checked) => handleUpdatePermission(permission, 'can_view_history', checked)}
-                    />
-                  </div>
-                </div>
-              </div>
+              <PermissionItem 
+                key={permission.id}
+                permission={permission}
+                onUpdate={handlePermissionUpdate}
+                onRemove={handlePermissionRemove}
+              />
             ))}
           </div>
         )}
@@ -385,83 +212,14 @@ const KeyPermissions = () => {
         </div>
       </div>
       
-      <Dialog open={isInviteModalOpen} onOpenChange={setIsInviteModalOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <UserPlus className="w-5 h-5 text-axiv-blue" />
-              {t('invitePeople')}
-            </DialogTitle>
-            <DialogDescription>
-              {t('invitePeopleDescription')}
-            </DialogDescription>
-          </DialogHeader>
-          
-          <div className="flex flex-col gap-4 py-4">
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="email" className="text-sm">
-                Email
-                <span className="text-red-500">*</span>
-              </Label>
-              <div className="flex items-center border rounded-md">
-                <div className="pl-3">
-                  <Mail className="h-4 w-4 text-axiv-gray" />
-                </div>
-                <Input
-                  id="email"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                  placeholder="email@example.com"
-                  className="border-0 focus-visible:ring-0"
-                  type="email"
-                  required
-                />
-              </div>
-            </div>
-            
-            <div className="flex flex-col gap-2">
-              <Label htmlFor="name" className="text-sm flex items-center">
-                {t('friendOrFamilyName')}
-                <span className="text-xs ml-1 text-axiv-gray">{t('optional')}</span>
-              </Label>
-              <Input
-                id="name"
-                value={inviteName}
-                onChange={(e) => setInviteName(e.target.value)}
-                placeholder="John Doe"
-              />
-            </div>
-            
-            <div className="space-y-3 mt-2">
-              <div className="flex items-center space-x-2">
-                <Checkbox id="can-unlock" checked={canUnlock} onCheckedChange={(checked) => setCanUnlock(checked === true)} />
-                <Label htmlFor="can-unlock" className="text-sm">{t('canUnlock')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="can-lock" checked={canLock} onCheckedChange={(checked) => setCanLock(checked === true)} />
-                <Label htmlFor="can-lock" className="text-sm">{t('canLock')}</Label>
-              </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox id="can-view-history" checked={canViewHistory} onCheckedChange={(checked) => setCanViewHistory(checked === true)} />
-                <Label htmlFor="can-view-history" className="text-sm">{t('canViewHistory')}</Label>
-              </div>
-            </div>
-          </div>
-          
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsInviteModalOpen(false)}>
-              {t('cancel')}
-            </Button>
-            <Button 
-              disabled={!inviteEmail || isSending} 
-              onClick={handleInviteUser} 
-              className="bg-axiv-blue hover:bg-axiv-blue/90 text-white"
-            >
-              {isSending ? t('sending') : t('sendInvite')}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      {keyData && id && (
+        <InviteUserDialog 
+          keyId={id}
+          isOpen={isInviteModalOpen}
+          onOpenChange={setIsInviteModalOpen}
+          onInviteSuccess={handleInviteSuccess}
+        />
+      )}
     </motion.div>
   );
 };
