@@ -60,7 +60,7 @@ const AddKeyModal = ({ isOpen, onClose, onAdd }: AddKeyModalProps) => {
               className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 
                        dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 
                        focus:ring-axiv-blue/50"
-              placeholder="Front Door, Car, Office, etc."
+              placeholder={t('keyNamePlaceholder')}
               required
             />
           </div>
@@ -78,9 +78,9 @@ const AddKeyModal = ({ isOpen, onClose, onAdd }: AddKeyModalProps) => {
                        focus:ring-axiv-blue/50"
             >
               <option>Smart Lock</option>
-              <option>Car</option>
-              <option>Office</option>
-              <option>Other</option>
+              <option>{t('car')}</option>
+              <option>{t('office')}</option>
+              <option>{t('other')}</option>
             </select>
           </div>
           
