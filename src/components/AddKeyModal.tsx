@@ -12,15 +12,14 @@ interface AddKeyModalProps {
 
 const AddKeyModal = ({ isOpen, onClose, onAdd }: AddKeyModalProps) => {
   const [keyName, setKeyName] = useState('');
-  const [keyType, setKeyType] = useState('Smart Lock');
   const { t } = useLanguage();
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (keyName.trim()) {
-      onAdd(keyName, keyType);
+      // Always use 'Smart Lock' as the default type
+      onAdd(keyName, 'Smart Lock');
       setKeyName('');
-      setKeyType('Smart Lock');
       onClose();
     }
   };
@@ -48,7 +47,7 @@ const AddKeyModal = ({ isOpen, onClose, onAdd }: AddKeyModalProps) => {
         </div>
         
         <form onSubmit={handleSubmit}>
-          <div className="mb-4">
+          <div className="mb-6">
             <label className="block text-sm font-medium mb-1 dark:text-gray-200" htmlFor="key-name">
               {t('keyName')}
             </label>
@@ -63,25 +62,6 @@ const AddKeyModal = ({ isOpen, onClose, onAdd }: AddKeyModalProps) => {
               placeholder={t('keyNamePlaceholder')}
               required
             />
-          </div>
-          
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-1 dark:text-gray-200" htmlFor="key-type">
-              {t('keyType')}
-            </label>
-            <select
-              id="key-type"
-              value={keyType}
-              onChange={(e) => setKeyType(e.target.value)}
-              className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 
-                       dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 
-                       focus:ring-axiv-blue/50"
-            >
-              <option>Smart Lock</option>
-              <option>{t('car')}</option>
-              <option>{t('office')}</option>
-              <option>{t('other')}</option>
-            </select>
           </div>
           
           <div className="flex space-x-3">

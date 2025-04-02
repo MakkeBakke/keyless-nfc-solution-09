@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Nfc, RefreshCw, Key } from 'lucide-react';
+import { Nfc, RefreshCw, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import KeyCard, { KeyData } from '@/components/KeyCard';
@@ -253,19 +253,6 @@ const Index = () => {
             >
               <RefreshCw size={20} className={isRefreshing ? "animate-spin" : ""} />
               <span className="tooltip">{t('refreshKeys')}</span>
-            </button>
-            
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className={cn(
-                "w-10 h-10 rounded-full bg-axiv-blue text-white flex items-center justify-center",
-                "shadow-md hover:bg-axiv-blue/90 active:scale-[0.97] transition-all",
-                "tooltip-container"
-              )}
-              aria-label={t('addNewKey')}
-            >
-              <Plus size={20} />
-              <span className="tooltip">{t('addNewKey')}</span>
             </button>
           </div>
         </div>
