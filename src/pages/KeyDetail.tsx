@@ -335,8 +335,8 @@ const KeyDetail = () => {
                 className={cn(
                   "w-full py-3 rounded-lg flex items-center justify-center transition-all",
                   isLocked 
-                    ? "bg-axiv-blue text-white hover:bg-axiv-blue/90" 
-                    : "bg-green-500 text-white hover:bg-green-600"
+                    ? "bg-green-500 text-white hover:bg-green-600"
+                    : "bg-red-500 text-white hover:bg-red-600" 
                 )}
               >
                 {isLocked ? (

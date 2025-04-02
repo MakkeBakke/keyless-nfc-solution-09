@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Nfc, RefreshCw, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -32,7 +31,7 @@ const Index = () => {
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
-  
+
   // Check if it's the user's first visit
   useEffect(() => {
     const hasVisitedBefore = localStorage.getItem('axiv_visited');
@@ -41,12 +40,12 @@ const Index = () => {
       localStorage.setItem('axiv_visited', 'true');
     }
   }, []);
-  
+
   useEffect(() => {
     // Check if user is authenticated
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (!session) {
         // User is not authenticated, show demo data
         setKeys([
@@ -72,9 +71,9 @@ const Index = () => {
         setLoading(false);
         return;
       }
-      
+
       setUserId(session.user.id);
-      
+
       // Fetch user's keys from database
       try {
         const { data, error } = await supabase
@@ -82,11 +81,11 @@ const Index = () => {
           .select('*')
           .eq('user_id', session.user.id)
           .order('created_at', { ascending: false });
-        
+
         if (error) {
           throw error;
         }
-        
+
         // Format keys for UI
         const formattedKeys = (data as KeyRecord[]).map((key) => ({
           id: key.id,
@@ -97,7 +96,7 @@ const Index = () => {
           batteryLevel: key.battery_level,
           isLocked: key.is_locked
         }));
-        
+
         setKeys(formattedKeys);
       } catch (error) {
         console.error('Error fetching keys:', error);
@@ -110,17 +109,17 @@ const Index = () => {
         setLoading(false);
       }
     };
-    
+
     checkSession();
   }, [t]);
-  
+
   const handleRefresh = async () => {
     if (!userId) {
       return;
     }
-    
+
     setIsRefreshing(true);
-    
+
     try {
       // Refresh keys from database
       const { data, error } = await supabase
@@ -128,11 +127,11 @@ const Index = () => {
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
-      
+
       if (error) {
         throw error;
       }
-      
+
       // Format keys for UI
       const formattedKeys = data.map((key) => ({
         id: key.id,
@@ -143,9 +142,9 @@ const Index = () => {
         batteryLevel: key.battery_level,
         isLocked: key.is_locked
       }));
-      
+
       setKeys(formattedKeys);
-      
+
       toast({
         title: "Synchronized",
         description: "All keys are up to date",
@@ -161,24 +160,24 @@ const Index = () => {
       setIsRefreshing(false);
     }
   };
-  
+
   return (
     <div className="min-h-screen pb-24 pt-24 px-4">
       <Header title={t('yourKeys')} />
-      
+
       <section className="max-w-md mx-auto">
         {showGuide && (
           <WelcomeGuide onClose={() => setShowGuide(false)} />
         )}
-      
+
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="text-2xl font-medium">{t('yourKeys')}</h2>
             <p className="text-axiv-gray text-sm">{t('manageKeys')}</p>
           </div>
-          
+
           <div className="flex space-x-2">
-            <button 
+            <button
               onClick={handleRefresh}
               className={cn(
                 "w-10 h-10 rounded-full bg-axiv-light-gray text-axiv-gray flex items-center justify-center",
@@ -193,7 +192,7 @@ const Index = () => {
             </button>
           </div>
         </div>
-        
+
         {loading ? (
           <div className="glass-card p-8 text-center">
             <div className="animate-pulse flex flex-col items-center">
@@ -209,7 +208,7 @@ const Index = () => {
             </div>
             <h3 className="text-lg font-medium mb-2">{t('noKeysAdded')}</h3>
             <p className="text-axiv-gray mb-4">{t('addFirstKey')}</p>
-            <button 
+            <button
               onClick={() => navigate('/pair')}
               className="px-4 py-2 bg-axiv-blue text-white rounded-lg hover:bg-axiv-blue/90 transition-colors"
             >
@@ -219,11 +218,15 @@ const Index = () => {
         ) : (
           <div className="mb-8">
             {keys.map((key) => (
-              <KeyCard key={key.id} keyData={key} />
+              <KeyCard
+                key={key.id}
+                keyData={key}
+                lockStatus={key.isLocked ? t('locked') : t('unlocked')} // Pass "locked" or "unlocked" as text
+              />
             ))}
           </div>
         )}
-        
+
         <div className="bg-axiv-blue/5 rounded-2xl p-4 mb-4">
           <h3 className="font-medium mb-2">{t('quickTips')}</h3>
           <ul className="text-sm text-axiv-gray space-y-2">
@@ -241,8 +244,8 @@ const Index = () => {
             </li>
           </ul>
         </div>
-        
-        <div 
+
+        <div
           className="glass-card p-4 flex items-center justify-between cursor-pointer animate-fade-in"
           onClick={() => navigate('/pair')}
         >
@@ -255,9 +258,9 @@ const Index = () => {
               <p className="text-axiv-gray text-sm">{t('connectNFC')}</p>
             </div>
           </div>
-          
+
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            <path d="M9 18L15 12L9 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
         </div>
       </section>

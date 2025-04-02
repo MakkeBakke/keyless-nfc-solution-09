@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Key, Clock, Battery, BatteryCharging } from 'lucide-react';
@@ -100,6 +99,16 @@ const KeyCard = ({ keyData }: KeyCardProps) => {
               <span className="text-xs text-axiv-gray dark:text-gray-400">{keyData.batteryLevel}%</span>
             </div>
           )}
+
+          {/* Lock/Unlock Status */}
+          <div
+            className={cn(
+              "text-sm font-medium",
+              keyData.isLocked ? "text-red-500" : "text-green-500" // Red for locked, green for unlocked
+            )}
+          >
+            {keyData.isLocked ? t('locked') : t('unlocked')}
+          </div>
         </div>
       </div>
     </motion.div>
