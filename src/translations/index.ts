@@ -6,6 +6,7 @@ import german from './german';
 import russian from './russian';
 
 export type TranslationKey =
+<<<<<<< HEAD
   | 'home'
   | 'profile'
   | 'settings'
@@ -27,6 +28,8 @@ export type TranslationKey =
   | 'tipLockUnlock'
   | 'tipPairDevice'
   | 'connectNFC'
+=======
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   | "loading"
   | "key"
   | "security"
@@ -61,6 +64,7 @@ export type TranslationKey =
   | "failedToAddKey"
   | "pairingFailed"
   | "deviceSuccessfullyPaired"
+<<<<<<< HEAD
   | "couldNotDetectDevice"
   | "permissions"
   | "keyNotFound"
@@ -76,6 +80,9 @@ export type TranslationKey =
   | "failedToLoadPermissions"
   | "demohoursago";   
 
+=======
+  | "couldNotDetectDevice";
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
 
 const translations = {
   english,

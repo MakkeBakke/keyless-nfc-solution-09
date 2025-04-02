@@ -60,7 +60,9 @@ export default {
   // Add Key Modal
   addDigitalKey: 'Lägg till digital nyckel',
   keyName: 'Nyckelnamn',
+  keyNamePlaceholder: 'Ytterdörr, Bil, Kontor, etc.',
   keyType: 'Nyckeltyp',
+<<<<<<< HEAD
   smartLock: 'Smartlås',
   digitalCard: 'Digitalt kort',
   enterKeyName: 'Ange nyckelnamn',
@@ -69,6 +71,20 @@ export default {
   car: 'Bil',
   office: 'Kontor',
   other: 'Annat',
+=======
+  car: 'Bil',
+  office: 'Kontor',
+  other: 'Annan',
+  quickTips: 'Snabbtips',
+  tipViewDetails: 'Klicka på en nyckel för att visa detaljer och få fler alternativ',
+  tipLockUnlock: 'Använd lås/upplås-knappen för att styra din smarta enhet',
+  tipPairDevice: 'Para ihop nya enheter genom att trycka på "Para Ihop Ny Enhet" nedan',
+  pairNewDevice: 'Para Ihop Ny Enhet',
+  connectNFC: 'Anslut din NFC-enhet',
+  noKeysAdded: 'Inga Nycklar Tillagda',
+  addFirstKey: 'Lägg till din första nyckel för att komma igång',
+  addKey: 'Lägg Till Nyckel',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   
   // Key Detail Page
   keyDetails: 'Nyckeldetaljer',
@@ -160,6 +176,7 @@ export default {
   noActivity: 'Ingen aktivitet registrerad än',
   failedToLoadActivity: 'Kunde inte ladda aktivitetsdata',
   
+<<<<<<< HEAD
   // Unlock Animation
   locking: 'Låser',
   unlocking: 'Låser upp',
@@ -197,10 +214,33 @@ export default {
   permissionChanges: 'Behörighetsändringar',
   notifyWhenPermissionChanges: 'Meddela när behörigheter ändras',
   lowBattery: 'Lågt batteri',
+=======
+  // Misc
+  syncSuccess: 'Synkroniserad',
+  keysUpToDate: 'Alla nycklar är uppdaterade',
+  unknownKey: 'Okänd Nyckel',
+  never: 'Aldrig',
+  unknown: 'Okänd',
+  viewHistory: 'Visa Historik',
+  
+  // Key Notifications
+  key: 'Nyckel',
+  notificationSettings: 'Notifikationsinställningar',
+  allActivity: 'All Aktivitet',
+  allActivityDescription: 'Meddela mig om all nyckelaktivitet',
+  unlockEvents: 'Upplåsningshändelser',
+  receiveNotificationWhenKeyIsUnlocked: 'Ta emot meddelande när nyckeln låses upp',
+  lockEvents: 'Låshändelser',
+  receiveNotificationWhenKeyIsLocked: 'Ta emot meddelande när nyckeln låses',
+  permissionChanges: 'Behörighetsändringar',
+  notifyWhenPermissionChanges: 'Meddela när behörigheter ändras',
+  lowBattery: 'Lågt Batteri',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   notifyWhenBatteryIsLow: 'Meddela när batteriet är lågt',
   attemptsToUnlock: 'Försök att låsa upp',
   notifyOnFailedUnlockAttempts: 'Meddela vid misslyckade upplåsningsförsök',
   securityAlerts: 'Säkerhetsvarningar',
+<<<<<<< HEAD
   receiveImportantSecurityAlerts: 'Få viktiga säkerhetsvarningar',
   accessRequests: 'Åtkomstförfrågningar',
   notifyWhenSomeoneRequestsAccess: 'Meddela när någon begär åtkomst',
@@ -227,6 +267,34 @@ export default {
   unlockNotificationsDescription: 'Få notis när nyckel låses upp',
   vibrationDetection: 'Vibrationsdetektering',
   vibrationDetectionDescription: 'Upptäck eventuella manipulationsförsök',
+=======
+  receiveImportantSecurityAlerts: 'Ta emot viktiga säkerhetsvarningar',
+  accessRequests: 'Åtkomstförfrågningar',
+  notifyWhenSomeoneRequestsAccess: 'Meddela när någon begär åtkomst',
+  saving: 'Sparar...',
+  saveSettings: 'Spara Inställningar',
+  settingsSaved: 'Inställningar Sparade',
+  notificationSettingsUpdated: 'Notifikationsinställningar uppdaterade',
+  failedToSaveNotificationSettings: 'Kunde inte spara notifikationsinställningar',
+  failedToLoadNotificationSettings: 'Kunde inte ladda notifikationsinställningar',
+  
+  // Key Security
+  autoLock: 'Automatisk Låsning',
+  autoLockDescription: 'Lås dörren automatiskt efter att den har låsts upp',
+  autoLockDelay: 'Fördröjning för Automatisk Låsning',
+  minutes: 'minuter',
+  geofencing: 'Geofencing',
+  geofencingDescription: 'Lås/lås upp automatiskt baserat på din plats',
+  twoFactorAuth: 'Tvåfaktorsautentisering',
+  twoFactorAuthDescription: 'Kräv en andra verifieringsform',
+  historyRetention: 'Historiklagring',
+  historyRetentionDescription: 'Hur länge aktivitetshistorik ska sparas',
+  days: 'dagar',
+  unlockNotifications: 'Upplåsningsnotiser',
+  unlockNotificationsDescription: 'Bli meddelad när nyckeln låses upp',
+  vibrationDetection: 'Vibrationsdetektering',
+  vibrationDetectionDescription: 'Upptäck möjliga manipuleringsförsök',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   securitySettingsUpdated: 'Säkerhetsinställningar uppdaterade',
   failedToSaveSecuritySettings: 'Kunde inte spara säkerhetsinställningar',
   failedToLoadSecuritySettings: 'Kunde inte ladda säkerhetsinställningar',
@@ -234,6 +302,7 @@ export default {
   // Key Permissions
   keyPermissions: 'Nyckelbehörigheter',
   people: 'personer',
+<<<<<<< HEAD
   invite: 'Bjud in',
   noUsersHaveAccess: 'Inga användare har tillgång till denna nyckel',
   canUnlock: 'Kan låsa upp',
@@ -266,3 +335,37 @@ export default {
   failedToInviteUser: 'Kunde inte bjuda in användare',
   failedToLoadPermissions: 'Kunde inte ladda behörigheter'
 };
+=======
+  invite: 'Bjud In',
+  noUsersHaveAccess: 'Inga användare har tillgång till denna nyckel',
+  canUnlock: 'Kan Låsa Upp',
+  canLock: 'Kan Låsa',
+  canViewHistory: 'Kan Se Historik',
+  invitationSettings: 'Inbjudningsinställningar',
+  allowNewInvitations: 'Tillåt Nya Inbjudningar',
+  enableDisableInvitations: 'Aktivera eller inaktivera nya inbjudningar',
+  requireApproval: 'Kräv Godkännande',
+  approvePeopleBeforeAccess: 'Godkänn personer innan de kan få åtkomst',
+  invitePeople: 'Bjud In Personer',
+  invitePeopleDescription: 'Lägg till vänner eller familj för att få åtkomst till denna nyckel',
+  friendOrFamilyName: 'Vän eller Familjemedlem',
+  optional: 'valfritt',
+  sending: 'Skickar...',
+  sendInvite: 'Skicka Inbjudan',
+  
+  // Miscellaneous
+  keyNotFound: 'Nyckel hittades inte',
+  backToHome: 'Tillbaka till Hem',
+  permissionUpdated: 'Behörighet Uppdaterad',
+  userPermissionsHaveBeenUpdated: 'Användarbehörigheter har uppdaterats',
+  failedToUpdatePermission: 'Kunde inte uppdatera behörighet',
+  accessRemoved: 'Åtkomst Borttagen',
+  userAccessRemoved: 'Användaråtkomst har tagits bort',
+  failedToRemoveAccess: 'Kunde inte ta bort åtkomst',
+  invitationSent: 'Inbjudan Skickad',
+  userWillReceiveEmail: 'Användaren kommer att få ett e-postmeddelande med instruktioner',
+  userAlreadyHasAccess: 'Denna användare har redan åtkomst',
+  failedToInviteUser: 'Kunde inte bjuda in användaren',
+  failedToLoadPermissions: 'Kunde inte ladda behörigheter'
+};
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878

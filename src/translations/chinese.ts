@@ -60,7 +60,9 @@ export default {
   // Add Key Modal
   addDigitalKey: '添加数字钥匙',
   keyName: '钥匙名称',
+  keyNamePlaceholder: '前门，汽车，办公室等',
   keyType: '钥匙类型',
+<<<<<<< HEAD
   smartLock: '智能锁',
   digitalCard: '数字卡',
   enterKeyName: '输入钥匙名称',
@@ -69,6 +71,20 @@ export default {
   car: '汽车',
   office: '办公室',
   other: '其他',
+=======
+  car: '汽车',
+  office: '办公室',
+  other: '其他',
+  quickTips: '快速提示',
+  tipViewDetails: '点击钥匙查看详情和更多选项',
+  tipLockUnlock: '使用锁定/解锁按钮控制您的智能设备',
+  tipPairDevice: '点击下方"配对新设备"来配对新设备',
+  pairNewDevice: '配对新设备',
+  connectNFC: '连接您的NFC设备',
+  noKeysAdded: '未添加钥匙',
+  addFirstKey: '添加您的第一把钥匙以开始使用',
+  addKey: '添加钥匙',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   
   // Key Detail Page
   keyDetails: '钥匙详情',
@@ -183,6 +199,22 @@ export default {
   // Language
   language: '语言',
   languageDesc: '更改应用语言',
+<<<<<<< HEAD
+=======
+  darkMode: '深色模式',
+  darkModeDesc: '在浅色和深色主题之间切换',
+  darkModeEnabled: '已启用深色模式',
+  darkModeDisabled: '已禁用深色模式',
+  appThemeDark: '应用主题设置为深色',
+  appThemeLight: '应用主题设置为浅色',
+  account: '账户',
+  appInfo: '应用信息',
+  appSettings: '应用设置',
+  signOut: '退出登录',
+  about: '关于',
+  signIn: '登录',
+  viewProfile: '查看个人资料',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   
   // Key Notifications
   key: '钥匙',
@@ -250,11 +282,96 @@ export default {
   sending: '发送中...',
   sendInvite: '发送邀请',
   
+<<<<<<< HEAD
+=======
+  // Errors
+  failedToLoadKeys: '无法加载您的钥匙',
+  failedToLoadKeyDetails: '无法加载钥匙详情',
+  failedToUpdateKeyState: '无法更新钥匙状态',
+  failedToDeleteKey: '无法删除钥匙',
+  failedToLoadActivity: '无法加载活动数据',
+  
+  // Misc
+  syncSuccess: '已同步',
+  keysUpToDate: '所有钥匙已更新',
+  unknownKey: '未知钥匙',
+  never: '从未',
+  unknown: '未知',
+  viewHistory: '查看历史',
+  
+  // Key Notifications
+  key: '钥匙',
+  notificationSettings: '通知设置',
+  allActivity: '所有活动',
+  allActivityDescription: '通知我所有钥匙活动',
+  unlockEvents: '解锁事件',
+  receiveNotificationWhenKeyIsUnlocked: '当钥匙解锁时接收通知',
+  lockEvents: '锁定事件',
+  receiveNotificationWhenKeyIsLocked: '当钥匙锁定时通知我',
+  permissionChanges: '权限变更',
+  notifyWhenPermissionChanges: '当权限变更时通知我',
+  lowBattery: '电池电量低',
+  notifyWhenBatteryIsLow: '当电池电量低时通知我',
+  attemptsToUnlock: '尝试解锁',
+  notifyOnFailedUnlockAttempts: '在解锁尝试失败时通知我',
+  securityAlerts: '安全警报',
+  receiveImportantSecurityAlerts: '接收重要安全警报',
+  accessRequests: '访问请求',
+  notifyWhenSomeoneRequestsAccess: '当有人请求访问时通知我',
+  saving: '保存中...',
+  saveSettings: '保存设置',
+  settingsSaved: '设置已保存',
+  notificationSettingsUpdated: '通知设置已更新',
+  failedToSaveNotificationSettings: '无法保存通知设置',
+  failedToLoadNotificationSettings: '无法加载通知设置',
+  
+  // Key Security
+  autoLock: '自动锁定',
+  autoLockDescription: '解锁后自动锁定门',
+  autoLockDelay: '自动锁定延迟',
+  minutes: '分钟',
+  geofencing: '地理围栏',
+  geofencingDescription: '根据您的位置自动锁定/解锁',
+  twoFactorAuth: '双因素认证',
+  twoFactorAuthDescription: '需要第二种验证方式',
+  historyRetention: '历史记录保留',
+  historyRetentionDescription: '保留活动历史的时间',
+  days: '天',
+  unlockNotifications: '解锁通知',
+  unlockNotificationsDescription: '当钥匙解锁时获取通知',
+  vibrationDetection: '振动检测',
+  vibrationDetectionDescription: '检测可能的篡改尝试',
+  securitySettingsUpdated: '安全设置已更新',
+  failedToSaveSecuritySettings: '无法保存安全设置',
+  failedToLoadSecuritySettings: '无法加载安全设置',
+
+  // Key Permissions
+  keyPermissions: '钥匙权限',
+  people: '人',
+  invite: '邀请',
+  noUsersHaveAccess: '没有用户有权访问此钥匙',
+  canUnlock: '可以解锁',
+  canLock: '可以锁定',
+  canViewHistory: '可以查看历史',
+  invitationSettings: '邀请设置',
+  allowNewInvitations: '允许新邀请',
+  enableDisableInvitations: '启用或禁用新邀请',
+  requireApproval: '需要批准',
+  approvePeopleBeforeAccess: '批准人员后才能访问',
+  invitePeople: '邀请人员',
+  invitePeopleDescription: '添加朋友或家人以访问此钥匙',
+  friendOrFamilyName: '朋友或家人姓名',
+  optional: '可选',
+  sending: '发送中...',
+  sendInvite: '发送邀请',
+  
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   // Miscellaneous
   keyNotFound: '未找到钥匙',
   backToHome: '返回首页',
   permissionUpdated: '权限已更新',
   userPermissionsHaveBeenUpdated: '用户权限已更新',
+<<<<<<< HEAD
   failedToUpdatePermission: '更新权限失败',
   accessRemoved: '访问已移除',
   userAccessRemoved: '用户访问权限已移除',
@@ -265,3 +382,15 @@ export default {
   failedToInviteUser: '邀请用户失败',
   failedToLoadPermissions: '加载权限失败'
 };
+=======
+  failedToUpdatePermission: '无法更新权限',
+  accessRemoved: '访问已移除',
+  userAccessRemoved: '用户访问已移除',
+  failedToRemoveAccess: '无法移除访问',
+  invitationSent: '邀请已发送',
+  userWillReceiveEmail: '用户将收到带有说明的电子邮件',
+  userAlreadyHasAccess: '该用户已有访问权限',
+  failedToInviteUser: '无法邀请用户',
+  failedToLoadPermissions: '无法加载权限'
+};
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878

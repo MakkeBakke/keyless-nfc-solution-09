@@ -124,7 +124,11 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
                 value={inviteEmail}
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="email@example.com"
+<<<<<<< HEAD
                 className="border-0 focus-visible:ring-3"
+=======
+                className="border-0 focus-visible:ring-0"
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
                 type="email"
                 required
               />

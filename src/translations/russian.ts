@@ -59,7 +59,9 @@ export default {
   // Add Key Modal
   addDigitalKey: 'Добавить цифровой ключ',
   keyName: 'Название ключа',
+  keyNamePlaceholder: 'Входная дверь, Машина, Офис и т.д.',
   keyType: 'Тип ключа',
+<<<<<<< HEAD
   smartLock: 'Умный замок',
   digitalCard: 'Цифровая карта',
   enterKeyName: 'Введите название ключа',
@@ -68,6 +70,20 @@ export default {
   car: 'Автомобиль',
   office: 'Офис',
   other: 'Другое',
+=======
+  car: 'Машина',
+  office: 'Офис',
+  other: 'Другое',
+  quickTips: 'Советы',
+  tipViewDetails: 'Нажмите на ключ, чтобы просмотреть подробности и получить доступ к дополнительным функциям',
+  tipLockUnlock: 'Используйте кнопку блокировки/разблокировки для управления вашим устройством',
+  tipPairDevice: 'Подключите новые устройства, нажав на "Сопряжение нового устройства" ниже',
+  pairNewDevice: 'Сопряжение нового устройства',
+  connectNFC: 'Подключите ваше NFC-устройство',
+  noKeysAdded: 'Ключи не добавлены',
+  addFirstKey: 'Добавьте свой первый ключ, чтобы начать',
+  addKey: 'Добавить ключ',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   
   // Key Detail Page
   keyDetails: 'Детали ключа',
@@ -159,6 +175,7 @@ export default {
   noActivity: 'Активность еще не записана',
   failedToLoadActivity: 'Не удалось загрузить данные активности',
   
+<<<<<<< HEAD
   // Unlock Animation
   locking: 'Блокировка',
   unlocking: 'Разблокировка',
@@ -183,25 +200,48 @@ export default {
   // Language
   language: 'Язык',
   languageDesc: 'Изменить язык приложения',
+=======
+  // Misc
+  syncSuccess: 'Синхронизировано',
+  keysUpToDate: 'Все ключи обновлены',
+  unknownKey: 'Неизвестный ключ',
+  never: 'Никогда',
+  unknown: 'Неизвестно',
+  viewHistory: 'Просмотр истории',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   
   // Key Notifications
   key: 'Ключ',
   notificationSettings: 'Настройки уведомлений',
   allActivity: 'Вся активность',
+<<<<<<< HEAD
   allActivityDescription: 'Уведомлять меня обо всей активности ключей',
+=======
+  allActivityDescription: 'Уведомлять меня обо всей активности ключа',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   unlockEvents: 'События разблокировки',
   receiveNotificationWhenKeyIsUnlocked: 'Получать уведомления при разблокировке ключа',
   lockEvents: 'События блокировки',
   receiveNotificationWhenKeyIsLocked: 'Получать уведомления при блокировке ключа',
   permissionChanges: 'Изменения разрешений',
+<<<<<<< HEAD
   notifyWhenPermissionChanges: 'Уведомлять об изменениях разрешений',
   lowBattery: 'Низкий заряд',
   notifyWhenBatteryIsLow: 'Уведомлять при низком заряде батареи',
+=======
+  notifyWhenPermissionChanges: 'Уведомлять при изменении разрешений',
+  lowBattery: 'Низкий заряд батареи',
+  notifyWhenBatteryIsLow: 'Уведомлять, когда заряд батареи низкий',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   attemptsToUnlock: 'Попытки разблокировки',
   notifyOnFailedUnlockAttempts: 'Уведомлять о неудачных попытках разблокировки',
   securityAlerts: 'Оповещения безопасности',
   receiveImportantSecurityAlerts: 'Получать важные оповещения безопасности',
+<<<<<<< HEAD
   accessRequests: 'Запросы доступа',
+=======
+  accessRequests: 'Запросы на доступ',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   notifyWhenSomeoneRequestsAccess: 'Уведомлять, когда кто-то запрашивает доступ',
   saving: 'Сохранение...',
   saveSettings: 'Сохранить настройки',
@@ -211,6 +251,7 @@ export default {
   failedToLoadNotificationSettings: 'Не удалось загрузить настройки уведомлений',
   
   // Key Security
+<<<<<<< HEAD
   autoLock: 'Автоблокировка',
   autoLockDescription: 'Автоматически блокировать дверь после разблокировки',
   autoLockDelay: 'Задержка автоблокировки',
@@ -226,25 +267,55 @@ export default {
   unlockNotificationsDescription: 'Получать уведомления при разблокировке',
   vibrationDetection: 'Обнаружение вибрации',
   vibrationDetectionDescription: 'Обнаружение возможных попыток взлома',
+=======
+  autoLock: 'Автоматическая блокировка',
+  autoLockDescription: 'Автоматически блокировать дверь после разблокировки',
+  autoLockDelay: 'Задержка автоматической блокировки',
+  minutes: 'минут',
+  geofencing: 'Геозонирование',
+  geofencingDescription: 'Блокировать/разблокировать автоматически на основе вашего местоположения',
+  twoFactorAuth: 'Двухфакторная аутентификация',
+  twoFactorAuthDescription: 'Требовать вторую форму проверки',
+  historyRetention: 'Хранение истории',
+  historyRetentionDescription: 'Как долго хранить историю активности',
+  days: 'дней',
+  unlockNotifications: 'Уведомления о разблокировке',
+  unlockNotificationsDescription: 'Получать уведомления при разблокировке ключа',
+  vibrationDetection: 'Обнаружение вибрации',
+  vibrationDetectionDescription: 'Обнаруживать возможные попытки взлома',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   securitySettingsUpdated: 'Настройки безопасности обновлены',
   failedToSaveSecuritySettings: 'Не удалось сохранить настройки безопасности',
   failedToLoadSecuritySettings: 'Не удалось загрузить настройки безопасности',
   
   // Key Permissions
   keyPermissions: 'Разрешения ключа',
+<<<<<<< HEAD
   people: 'люди',
   invite: 'Пригласить',
   noUsersHaveAccess: 'Нет пользователей с доступом к этому ключу',
+=======
+  people: 'человек',
+  invite: 'Пригласить',
+  noUsersHaveAccess: 'Ни у кого нет доступа к этому ключу',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   canUnlock: 'Может разблокировать',
   canLock: 'Может блокировать',
   canViewHistory: 'Может просматривать историю',
   invitationSettings: 'Настройки приглашений',
   allowNewInvitations: 'Разрешить новые приглашения',
   enableDisableInvitations: 'Включить или отключить новые приглашения',
+<<<<<<< HEAD
   requireApproval: 'Требовать подтверждения',
   approvePeopleBeforeAccess: 'Подтверждать пользователей перед предоставлением доступа',
   invitePeople: 'Пригласить людей',
   invitePeopleDescription: 'Добавьте друзей или семью для доступа к этому ключу',
+=======
+  requireApproval: 'Требовать одобрения',
+  approvePeopleBeforeAccess: 'Одобрять людей перед предоставлением доступа',
+  invitePeople: 'Пригласить людей',
+  invitePeopleDescription: 'Добавить друзей или семью для доступа к этому ключу',
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   friendOrFamilyName: 'Имя друга или члена семьи',
   optional: 'необязательно',
   sending: 'Отправка...',
@@ -254,6 +325,7 @@ export default {
   keyNotFound: 'Ключ не найден',
   backToHome: 'Вернуться на главную',
   permissionUpdated: 'Разрешение обновлено',
+<<<<<<< HEAD
   userPermissionsHaveBeenUpdated: 'Пользовательские разрешения обновлены',
   failedToUpdatePermission: 'Не удалось обновить разрешение',
   accessRemoved: 'Доступ удален',
@@ -265,3 +337,16 @@ export default {
   failedToInviteUser: 'Не удалось пригласить пользователя',
   failedToLoadPermissions: 'Не удалось загрузить разрешения'
 };
+=======
+  userPermissionsHaveBeenUpdated: 'Разрешения пользователя были обновлены',
+  failedToUpdatePermission: 'Не удалось обновить разрешение',
+  accessRemoved: 'Доступ удален',
+  userAccessRemoved: 'Доступ пользователя был удален',
+  failedToRemoveAccess: 'Не удалось удалить доступ',
+  invitationSent: 'Приглашение отправлено',
+  userWillReceiveEmail: 'Пользователь получит электронное письмо с инструкциями',
+  userAlreadyHasAccess: 'У этого пользователя уже есть доступ',
+  failedToInviteUser: 'Не удалось пригласить пользователя',
+  failedToLoadPermissions: 'Не удалось загрузить разрешения'
+};
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878

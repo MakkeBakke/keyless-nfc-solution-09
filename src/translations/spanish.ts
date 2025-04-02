@@ -26,7 +26,44 @@ export default {
   home: 'Inicio',
   yourKeys: 'Tus llaves',
   activity: 'Actividad',
+<<<<<<< HEAD
   settings: 'Configuración',
+=======
+  
+  // Keys
+  yourKeys: 'Tus Llaves',
+  manageKeys: 'Administra y controla tus llaves digitales',
+  refreshKeys: 'Actualizar Llaves',
+  addNewKey: 'Añadir Nueva Llave',
+  keyName: 'Nombre de Llave',
+  keyNamePlaceholder: 'Puerta Principal, Coche, Oficina, etc.',
+  keyType: 'Tipo de Llave',
+  car: 'Coche',
+  office: 'Oficina',
+  other: 'Otro',
+  quickTips: 'Consejos Rápidos',
+  tipViewDetails: 'Haz clic en una llave para ver detalles y más opciones',
+  tipLockUnlock: 'Usa el botón de bloquear/desbloquear para controlar tu dispositivo',
+  tipPairDevice: 'Empareja nuevos dispositivos tocando "Emparejar Nuevo Dispositivo" abajo',
+  pairNewDevice: 'Emparejar Nuevo Dispositivo',
+  connectNFC: 'Conecta tu dispositivo NFC',
+  noKeysAdded: 'No Hay Llaves Añadidas',
+  addFirstKey: 'Añade tu primera llave para comenzar',
+  addKey: 'Añadir Llave',
+  
+  // Key details
+  keyInformation: 'Información de Llave',
+  status: 'Estado',
+  active: 'Activa',
+  inactive: 'Inactiva',
+  lastUsed: 'Último Uso',
+  pairedOn: 'Emparejada El',
+  permissions: 'Permisos',
+  securitySettings: 'Configuración de Seguridad',
+  manageSecuritySettings: 'Administra la configuración de seguridad de tu llave',
+  
+  // Notifications
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   notifications: 'Notificaciones',
   
   // Settings Page
@@ -249,6 +286,7 @@ export default {
   sending: 'Enviando...',
   sendInvite: 'Enviar invitación',
   
+<<<<<<< HEAD
   // Miscellaneous
   keyNotFound: 'Llave no encontrada',
   backToHome: 'Volver al inicio',
@@ -264,3 +302,101 @@ export default {
   failedToInviteUser: 'Error al invitar usuario',
   failedToLoadPermissions: 'Error al cargar permisos'
 };
+=======
+  // Errors
+  failedToLoadKeys: 'Error al cargar tus llaves',
+  failedToLoadKeyDetails: 'Error al cargar los detalles de la llave',
+  failedToUpdateKeyState: 'Error al actualizar el estado de la llave',
+  failedToDeleteKey: 'Error al eliminar la llave',
+  failedToLoadActivity: 'Error al cargar los datos de actividad',
+  
+  // Misc
+  syncSuccess: 'Sincronizado',
+  keysUpToDate: 'Todas las llaves están actualizadas',
+  unknownKey: 'Llave Desconocida',
+  never: 'Nunca',
+  unknown: 'Desconocido',
+  viewHistory: 'Ver Historial',
+  
+  // Key Notifications
+  key: 'Llave',
+  notificationSettings: 'Configuración de Notificaciones',
+  allActivity: 'Toda la Actividad',
+  allActivityDescription: 'Notificarme de toda la actividad de la llave',
+  unlockEvents: 'Eventos de Desbloqueo',
+  receiveNotificationWhenKeyIsUnlocked: 'Recibir notificación cuando la llave se desbloquea',
+  lockEvents: 'Eventos de Bloqueo',
+  receiveNotificationWhenKeyIsLocked: 'Recibir notificación cuando la llave se bloquea',
+  permissionChanges: 'Cambios de Permisos',
+  notifyWhenPermissionChanges: 'Notificar cuando los permisos cambian',
+  lowBattery: 'Batería Baja',
+  notifyWhenBatteryIsLow: 'Notificar cuando la batería está baja',
+  attemptsToUnlock: 'Intentos de Desbloqueo',
+  notifyOnFailedUnlockAttempts: 'Notificar sobre intentos fallidos de desbloqueo',
+  securityAlerts: 'Alertas de Seguridad',
+  receiveImportantSecurityAlerts: 'Recibir alertas importantes de seguridad',
+  accessRequests: 'Solicitudes de Acceso',
+  notifyWhenSomeoneRequestsAccess: 'Notificar cuando alguien solicita acceso',
+  saving: 'Guardando...',
+  saveSettings: 'Guardar Configuración',
+  settingsSaved: 'Configuración Guardada',
+  notificationSettingsUpdated: 'Configuración de notificaciones actualizada',
+  failedToSaveNotificationSettings: 'Error al guardar la configuración de notificaciones',
+  failedToLoadNotificationSettings: 'Error al cargar la configuración de notificaciones',
+  
+  // Key Security
+  autoLock: 'Bloqueo Automático',
+  autoLockDescription: 'Bloquear automáticamente la puerta después de desbloquearla',
+  autoLockDelay: 'Retardo de Bloqueo Automático',
+  minutes: 'minutos',
+  geofencing: 'Geovallado',
+  geofencingDescription: 'Bloquear/desbloquear automáticamente según tu ubicación',
+  twoFactorAuth: 'Autenticación de Dos Factores',
+  twoFactorAuthDescription: 'Requerir una segunda forma de verificación',
+  historyRetention: 'Retención de Historial',
+  historyRetentionDescription: 'Cuánto tiempo conservar el historial de actividad',
+  days: 'días',
+  unlockNotifications: 'Notificaciones de Desbloqueo',
+  unlockNotificationsDescription: 'Recibir notificaciones cuando la llave se desbloquea',
+  vibrationDetection: 'Detección de Vibración',
+  vibrationDetectionDescription: 'Detectar posibles intentos de manipulación',
+  securitySettingsUpdated: 'Configuración de seguridad actualizada',
+  failedToSaveSecuritySettings: 'Error al guardar la configuración de seguridad',
+  failedToLoadSecuritySettings: 'Error al cargar la configuración de seguridad',
+  
+  // Key Permissions
+  keyPermissions: 'Permisos de Llave',
+  people: 'personas',
+  invite: 'Invitar',
+  noUsersHaveAccess: 'Ningún usuario tiene acceso a esta llave',
+  canUnlock: 'Puede Desbloquear',
+  canLock: 'Puede Bloquear',
+  canViewHistory: 'Puede Ver Historial',
+  invitationSettings: 'Configuración de Invitaciones',
+  allowNewInvitations: 'Permitir Nuevas Invitaciones',
+  enableDisableInvitations: 'Habilitar o deshabilitar nuevas invitaciones',
+  requireApproval: 'Requerir Aprobación',
+  approvePeopleBeforeAccess: 'Aprobar personas antes de que puedan acceder',
+  invitePeople: 'Invitar Personas',
+  invitePeopleDescription: 'Añadir amigos o familiares para acceder a esta llave',
+  friendOrFamilyName: 'Nombre de Amigo o Familiar',
+  optional: 'opcional',
+  sending: 'Enviando...',
+  sendInvite: 'Enviar Invitación',
+  
+  // Miscellaneous
+  keyNotFound: 'Llave no encontrada',
+  backToHome: 'Volver al Inicio',
+  permissionUpdated: 'Permiso Actualizado',
+  userPermissionsHaveBeenUpdated: 'Los permisos del usuario han sido actualizados',
+  failedToUpdatePermission: 'Error al actualizar el permiso',
+  accessRemoved: 'Acceso Eliminado',
+  userAccessRemoved: 'El acceso del usuario ha sido eliminado',
+  failedToRemoveAccess: 'Error al eliminar el acceso',
+  invitationSent: 'Invitación Enviada',
+  userWillReceiveEmail: 'El usuario recibirá un correo electrónico con instrucciones',
+  userAlreadyHasAccess: 'Este usuario ya tiene acceso',
+  failedToInviteUser: 'Error al invitar al usuario',
+  failedToLoadPermissions: 'Error al cargar los permisos'
+};
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878

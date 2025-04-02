@@ -267,6 +267,7 @@ const PairDevice = () => {
           </div>
           
           <div className="text-center mb-8">
+<<<<<<< HEAD
             <p className="text-axiv-gray">
             {step === 1 && t('pairYourNFCDevice')}
             {step === 2 && t('holdNFCDeviceNearPhone')}
@@ -274,6 +275,20 @@ const PairDevice = () => {
               (pairingSuccess
               ? t('deviceSuccessfullyPaired')
               : t('couldNotDetectDevice'))}
+=======
+            <h2 className="text-2xl font-medium mb-2">
+              {step === 1 && t('pairNewDevice')}
+              {step === 2 && t('scanning')}
+              {step === 3 && (pairingSuccess ? t('pairingSuccessful') : t('pairingFailed'))}
+            </h2>
+            <p className="text-axiv-gray">
+              {step === 1 && t('pairYourNFCDevice')}
+              {step === 2 && t('holdNFCDeviceNearPhone')}
+              {step === 3 && (pairingSuccess 
+                ? t('deviceSuccessfullyPaired')
+                : t('couldNotDetectDevice')
+              )}
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
             </p>
             
             {errorMessage && (
@@ -289,6 +304,7 @@ const PairDevice = () => {
           
           {step === 1 && (
             <div className="space-y-4">
+<<<<<<< HEAD
   <div className="bg-axiv-light-gray p-4 rounded-xl">
     <h3 className="font-medium mb-2">{t('beforeYouStart')}:</h3>
     <ul className="text-sm space-y-2">
@@ -317,6 +333,36 @@ const PairDevice = () => {
     {t('startPairing')}
   </button>
 </div>
+=======
+              <div className="bg-axiv-light-gray p-4 rounded-xl">
+                <h3 className="font-medium mb-2">{t('beforeYouStart')}:</h3>
+                <ul className="text-sm space-y-2">
+                  <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">1</span>
+                    {t('makeNFCDeviceActivated')}
+                  </li>
+                  <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">2</span>
+                    {t('enableNFCOnPhone')}
+                  </li>
+                  <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">3</span>
+                    {t('holdDeviceCloseToPhone')}
+                  </li>
+                </ul>
+              </div>
+              
+              <button 
+                onClick={() => {
+                  setStep(2);
+                  startScanning();
+                }}
+                className="w-full py-3 bg-axiv-blue text-white rounded-xl hover:bg-axiv-blue/90 transition-colors"
+              >
+                {t('startPairing')}
+              </button>
+            </div>
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
           )}
           
           {step === 2 && (

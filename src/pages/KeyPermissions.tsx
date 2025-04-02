@@ -114,14 +114,22 @@ const KeyPermissions = () => {
 
   if (loading) {
     return (
+<<<<<<< HEAD
       <div className="min-h-screen pb-24 pt-24">
         <Header title={t('permissions')} showBackButton />
         <div className="container max-w-md mx-auto px-4">
           <div className="glass-card animate-pulse space-y-4">
+=======
+      <div className="min-h-screen pb-24 pt-24 px-4">
+        <Header title={t('permissions')} showBackButton />
+        <div className="max-w-md mx-auto">
+          <div className="animate-pulse space-y-4">
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
             <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
             <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
             <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
           </div>
+<<<<<<< HEAD
         </div>
       </div>
     );
@@ -138,10 +146,13 @@ const KeyPermissions = () => {
               {t('backToHome')}
             </Button>
           </div>
+=======
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
         </div>
       </div>
     );
   }
+<<<<<<< HEAD
   return (
     <div className="min-h-screen pb-24 pt-24">
       <Header title={t('permissions')} showBackButton />
@@ -172,6 +183,56 @@ const KeyPermissions = () => {
           </div>
         ) : (
           <div className="glass-card p-0 overflow-hidden">
+=======
+
+  if (!keyData) {
+    return (
+      <div className="min-h-screen pb-24 pt-24 px-4">
+        <Header title={t('permissions')} showBackButton />
+        <div className="max-w-md mx-auto">
+          <div className="glass-card p-8 text-center">
+            <p>{t('keyNotFound')}</p>
+            <Button onClick={() => navigate('/')} className="mt-4">
+              {t('backToHome')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <motion.div 
+      className="min-h-screen pb-24 pt-24 px-4"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      <Header title={t('permissions')} showBackButton />
+      
+      <div className="max-w-md mx-auto">
+        <div className="mb-4">
+          <h2 className="text-2xl font-medium dark:text-white">{t('keyPermissions')}</h2>
+          <p className="text-axiv-gray dark:text-gray-400 mb-4">
+            {keyData.name} - {permissions.length} {t('people')}
+          </p>
+          
+          <Button 
+            onClick={() => setIsInviteModalOpen(true)} 
+            className="bg-axiv-blue hover:bg-axiv-blue/90 text-white transition-colors mb-6"
+          >
+            <UserPlus className="w-4 h-4 mr-2" />
+            {t('invite')}
+          </Button>
+        </div>
+        
+        {permissions.length === 0 ? (
+          <div className="glass-card p-8 text-center dark:bg-gray-800 dark:border-gray-700">
+            <p className="text-axiv-gray dark:text-gray-400">{t('noUsersHaveAccess')}</p>
+          </div>
+        ) : (
+          <div className="glass-card mb-4 p-0 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
             {permissions.map((permission) => (
               <PermissionItem 
                 key={permission.id}
@@ -183,6 +244,7 @@ const KeyPermissions = () => {
           </div>
         )}
         
+<<<<<<< HEAD
         <div className="glass-card p-6 space-y-6">
           <h3 className="text-lg font-medium dark:text-white">{t('invitationSettings')}</h3>
           
@@ -207,7 +269,31 @@ const KeyPermissions = () => {
                 />
               </div>
               <p className="text-xs text-axiv-gray dark:text-gray-400">{t('approvePeopleBeforeAccess')}</p>
+=======
+        <div className="glass-card mb-4 dark:bg-gray-800 dark:border-gray-700">
+          <h3 className="text-lg font-medium mb-4 dark:text-white">{t('invitationSettings')}</h3>
+          
+          <div className="mb-4">
+            <div className="flex items-center justify-between mb-1">
+              <Label className="text-sm font-medium">{t('allowNewInvitations')}</Label>
+              <Switch 
+                checked={allowInvitations}
+                onCheckedChange={setAllowInvitations}
+              />
             </div>
+            <p className="text-xs text-axiv-gray dark:text-gray-400">{t('enableDisableInvitations')}</p>
+          </div>
+          
+          <div>
+            <div className="flex items-center justify-between mb-1">
+              <Label className="text-sm font-medium">{t('requireApproval')}</Label>
+              <Switch 
+                checked={requireApproval}
+                onCheckedChange={setRequireApproval}
+              />
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
+            </div>
+            <p className="text-xs text-axiv-gray dark:text-gray-400">{t('approvePeopleBeforeAccess')}</p>
           </div>
         </div>
       </div>
@@ -220,7 +306,11 @@ const KeyPermissions = () => {
           onInviteSuccess={handleInviteSuccess}
         />
       )}
+<<<<<<< HEAD
     </div>
+=======
+    </motion.div>
+>>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   );
 };
 
