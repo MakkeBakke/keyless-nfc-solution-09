@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Nfc, CheckCircle, XCircle } from 'lucide-react';
@@ -20,39 +19,41 @@ const PairDevice = () => {
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
   const [nfcPermissionGranted, setNfcPermissionGranted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  
+
   useEffect(() => {
     // Check if user is authenticated
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
-      
+
       if (session) {
         setUserId(session.user.id);
       }
     };
-    
+
     checkSession();
     checkNfcSupport();
   }, []);
-  
+
   const checkNfcSupport = async () => {
     try {
       if (!('NDEFReader' in window)) {
         console.log('Web NFC API is not supported in this browser');
         setNfcSupported(false);
+        setErrorMessage('NFC is not supported on this device or browser.');
         return;
       }
-      
+
       setNfcSupported(true);
     } catch (error) {
       console.error('Error checking NFC support:', error);
       setNfcSupported(false);
+      setErrorMessage('Error checking NFC support. Please try again.');
     }
   };
-  
+
   const requestNfcPermission = async () => {
     if (!nfcSupported) return;
-    
+
     try {
       // @ts-ignore - NDEFReader might not be recognized by TypeScript
       const ndef = new NDEFReader();
@@ -72,39 +73,37 @@ const PairDevice = () => {
       return false;
     }
   };
-  
+
   useEffect(() => {
     if (step === 2 && scanning) {
       let nfcTimeout: NodeJS.Timeout;
       let nfcDetected = false;
-      
+
       const scanForNfc = async () => {
         try {
           if (!nfcSupported) {
-            // Simulate scanning for demo purposes if NFC not supported
-            nfcTimeout = setTimeout(() => {
-              setScanning(false);
-              setPairingSuccess(Math.random() > 0.2); // 80% success chance for demo
-              setStep(3);
-            }, 3000);
+            // Stop the process if NFC is not supported
+            setScanning(false);
+            setPairingSuccess(false);
+            setStep(3);
             return;
           }
-          
+
           // Real NFC scanning
           // @ts-ignore - NDEFReader might not be recognized by TypeScript
           const ndef = new NDEFReader();
-          
+
           ndef.addEventListener("reading", (event: any) => {
             console.log("NFC tag detected!");
             console.log("Serial number:", event.serialNumber);
-            
+
             // Successfully read an NFC tag
             nfcDetected = true;
             setScanning(false);
             setPairingSuccess(true);
             setStep(3);
           });
-          
+
           ndef.addEventListener("error", (error: any) => {
             console.error(`NFC Error: ${error.message}`);
             if (!nfcDetected) {
@@ -113,9 +112,9 @@ const PairDevice = () => {
               setStep(3);
             }
           });
-          
+
           await ndef.scan();
-          
+
           // Set a timeout for the scanning process
           nfcTimeout = setTimeout(() => {
             if (!nfcDetected) {
@@ -124,7 +123,7 @@ const PairDevice = () => {
               setStep(3);
             }
           }, 10000); // 10 seconds timeout
-          
+
         } catch (error) {
           console.error('Error scanning for NFC:', error);
           setScanning(false);
@@ -132,18 +131,18 @@ const PairDevice = () => {
           setStep(3);
         }
       };
-      
+
       scanForNfc();
-      
+
       return () => {
         if (nfcTimeout) clearTimeout(nfcTimeout);
       };
     }
   }, [step, scanning, nfcSupported]);
-  
+
   const startScanning = async () => {
     setErrorMessage(null);
-    
+
     // Request NFC permission if supported
     if (nfcSupported && !nfcPermissionGranted) {
       const permissionGranted = await requestNfcPermission();
@@ -152,17 +151,17 @@ const PairDevice = () => {
         return;
       }
     }
-    
+
     setScanning(true);
   };
-  
+
   const resetPairing = () => {
     setStep(1);
     setScanning(false);
     setPairingSuccess(null);
     setErrorMessage(null);
   };
-  
+
   const finishPairing = () => {
     // Only show the add key modal if pairing was successful
     if (pairingSuccess) {
@@ -171,14 +170,14 @@ const PairDevice = () => {
       navigate('/');
     }
   };
-  
+
   const handleAddKey = async (keyName: string) => {
     if (!userId) {
       // Redirect to profile for login/signup
       navigate('/profile');
       return;
     }
-    
+
     try {
       // Insert new key into database
       const { data, error } = await supabase
@@ -193,11 +192,11 @@ const PairDevice = () => {
         })
         .select()
         .single();
-      
+
       if (error) {
         throw error;
       }
-      
+
       // Log activity
       await supabase
         .from('key_activity')
@@ -206,12 +205,12 @@ const PairDevice = () => {
           user_id: userId,
           action: 'create'
         });
-      
+
       toast({
         title: t('keyAdded'),
         description: `${keyName} ${t('hasBeenAddedToYourKeys')}`,
       });
-      
+
       // Navigate back to the home page
       navigate('/');
     } catch (error) {
@@ -223,11 +222,11 @@ const PairDevice = () => {
       });
     }
   };
-  
+
   return (
     <div className="min-h-screen pb-24 pt-24 px-4">
       <Header title={t('pairDevice')} showBackButton />
-      
+
       <div className="max-w-md mx-auto">
         <div className="glass-card p-6 animate-fade-in">
           <div className="flex justify-center mb-6">
@@ -241,12 +240,12 @@ const PairDevice = () => {
                   </div>
                 </>
               )}
-              
+
               <div className={cn(
                 "w-20 h-20 rounded-full flex items-center justify-center z-10 relative",
-                step === 3 
-                  ? pairingSuccess 
-                    ? "bg-green-500/10" 
+                step === 3
+                  ? pairingSuccess
+                    ? "bg-green-500/10"
                     : "bg-red-500/10"
                   : "bg-axiv-blue/10"
               )}>
@@ -265,86 +264,86 @@ const PairDevice = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="text-center mb-8">
             <p className="text-axiv-gray">
-            {step === 1 && t('pairYourNFCDevice')}
-            {step === 2 && t('holdNFCDeviceNearPhone')}
-            {step === 3 &&
-              (pairingSuccess
-              ? t('deviceSuccessfullyPaired')
-              : t('couldNotDetectDevice'))}
+              {step === 1 && t('pairYourNFCDevice')}
+              {step === 2 && t('holdNFCDeviceNearPhone')}
+              {step === 3 &&
+                (pairingSuccess
+                  ? t('deviceSuccessfullyPaired')
+                  : t('couldNotDetectDevice'))}
             </p>
-            
+
             {errorMessage && (
               <p className="text-red-500 mt-2 text-sm">{errorMessage}</p>
             )}
-            
+
             {nfcSupported === false && step === 1 && (
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                <p>Your device doesn't support NFC or the browser doesn't have access to NFC capabilities. A simulation mode will be used for demonstration purposes.</p>
+                <p>NFC is not supported on this device or browser. Please use a compatible device.</p>
               </div>
             )}
           </div>
-          
+
           {step === 1 && (
             <div className="space-y-4">
-  <div className="bg-axiv-light-gray p-4 rounded-xl">
-    <h3 className="font-medium mb-2">{t('beforeYouStart')}:</h3>
-    <ul className="text-sm space-y-2">
-      <li className="flex items-start">
-        <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">1</span>
-        <p>{t('makeNFCDeviceActivated')}</p>
-      </li>
-      <li className="flex items-start">
-        <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">2</span>
-        <p>{t('enableNFCOnPhone')}</p>
-      </li>
-      <li className="flex items-start">
-        <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">3</span>
-        <p>{t('holdDeviceCloseToPhone')}</p>
-      </li>
-    </ul>
-  </div>
+              <div className="bg-axiv-light-gray p-4 rounded-xl">
+                <h3 className="font-medium mb-2">{t('beforeYouStart')}:</h3>
+                <ul className="text-sm space-y-2">
+                  <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">1</span>
+                    <p>{t('makeNFCDeviceActivated')}</p>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">2</span>
+                    <p>{t('enableNFCOnPhone')}</p>
+                  </li>
+                  <li className="flex items-start">
+                    <span className="inline-block w-4 h-4 bg-axiv-blue rounded-full text-white flex items-center justify-center text-xs mr-2 mt-0.5">3</span>
+                    <p>{t('holdDeviceCloseToPhone')}</p>
+                  </li>
+                </ul>
+              </div>
 
-  <button 
-    onClick={() => {
-      setStep(2);
-      startScanning();
-    }}
-    className="w-full py-3 bg-axiv-blue text-white rounded-xl hover:bg-axiv-blue/90 transition-colors"
-  >
-    {t('startPairing')}
-  </button>
-</div>
+              <button
+                onClick={() => {
+                  setStep(2);
+                  startScanning();
+                }}
+                className="w-full py-3 bg-axiv-blue text-white rounded-xl hover:bg-axiv-blue/90 transition-colors"
+              >
+                {t('startPairing')}
+              </button>
+            </div>
           )}
-          
+
           {step === 2 && (
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-axiv-blue border-t-transparent mb-4"></div>
               <p className="text-sm text-axiv-gray">{t('mayTakeAFewMoments')}</p>
             </div>
           )}
-          
+
           {step === 3 && (
             <div className="space-y-3">
               {pairingSuccess ? (
-                <button 
+                <button
                   onClick={finishPairing}
                   className="w-full py-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors"
                 >
                   {t('continue')}
                 </button>
               ) : (
-                <button 
+                <button
                   onClick={resetPairing}
                   className="w-full py-3 bg-axiv-blue text-white rounded-xl hover:bg-axiv-blue/90 transition-colors"
                 >
                   {t('tryAgain')}
                 </button>
               )}
-              
-              <button 
+
+              <button
                 onClick={() => navigate('/')}
                 className="w-full py-3 border border-gray-200 rounded-xl hover:bg-gray-50 transition-colors"
               >
@@ -354,7 +353,7 @@ const PairDevice = () => {
           )}
         </div>
       </div>
-      
+
       <AddKeyModal
         isOpen={showAddModal}
         onClose={() => navigate('/')}
