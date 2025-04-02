@@ -59,9 +59,7 @@ export default {
   // Add Key Modal
   addDigitalKey: 'Digitalen Schlüssel hinzufügen',
   keyName: 'Schlüsselname',
-  keyNamePlaceholder: 'Haustür, Auto, Büro, etc.',
   keyType: 'Schlüsseltyp',
-<<<<<<< HEAD
   smartLock: 'Smart Lock',
   digitalCard: 'Digitale Karte',
   enterKeyName: 'Schlüsselnamen eingeben',
@@ -70,20 +68,6 @@ export default {
   car: 'Auto',
   office: 'Büro',
   other: 'Andere',
-=======
-  car: 'Auto',
-  office: 'Büro',
-  other: 'Sonstiges',
-  quickTips: 'Schnelltipps',
-  tipViewDetails: 'Klicke auf einen Schlüssel, um Details und weitere Optionen anzuzeigen',
-  tipLockUnlock: 'Verwende die Sperren/Entsperren-Taste, um dein Smart-Gerät zu steuern',
-  tipPairDevice: 'Koppele neue Geräte, indem du unten auf "Neues Gerät koppeln" tippst',
-  pairNewDevice: 'Neues Gerät koppeln',
-  connectNFC: 'Verbinde dein NFC-Gerät',
-  noKeysAdded: 'Keine Schlüssel hinzugefügt',
-  addFirstKey: 'Füge deinen ersten Schlüssel hinzu, um zu beginnen',
-  addKey: 'Schlüssel hinzufügen',
->>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   
   // Key Detail Page
   keyDetails: 'Schlüsseldetails',
@@ -266,96 +250,11 @@ export default {
   sending: 'Wird gesendet...',
   sendInvite: 'Einladung senden',
   
-<<<<<<< HEAD
-=======
-  // Errors
-  failedToLoadKeys: 'Laden deiner Schlüssel fehlgeschlagen',
-  failedToLoadKeyDetails: 'Laden der Schlüsseldetails fehlgeschlagen',
-  failedToUpdateKeyState: 'Aktualisieren des Schlüsselstatus fehlgeschlagen',
-  failedToDeleteKey: 'Löschen des Schlüssels fehlgeschlagen',
-  failedToLoadActivity: 'Laden der Aktivitätsdaten fehlgeschlagen',
-  
-  // Misc
-  syncSuccess: 'Synchronisiert',
-  keysUpToDate: 'Alle Schlüssel sind aktuell',
-  unknownKey: 'Unbekannter Schlüssel',
-  never: 'Nie',
-  unknown: 'Unbekannt',
-  viewHistory: 'Verlauf anzeigen',
-  
-  // Key Notifications
-  key: 'Schlüssel',
-  notificationSettings: 'Benachrichtigungseinstellungen',
-  allActivity: 'Alle Aktivitäten',
-  allActivityDescription: 'Benachrichtige mich über alle Schlüsselaktivitäten',
-  unlockEvents: 'Entsperr-Ereignisse',
-  receiveNotificationWhenKeyIsUnlocked: 'Benachrichtigung erhalten, wenn Schlüssel entsperrt wird',
-  lockEvents: 'Sperr-Ereignisse',
-  receiveNotificationWhenKeyIsLocked: 'Benachrichtigung erhalten, wenn Schlüssel gesperrt wird',
-  permissionChanges: 'Berechtigungsänderungen',
-  notifyWhenPermissionChanges: 'Benachrichtigen, wenn sich Berechtigungen ändern',
-  lowBattery: 'Niedriger Batteriestand',
-  notifyWhenBatteryIsLow: 'Benachrichtigen, wenn Batteriestand niedrig ist',
-  attemptsToUnlock: 'Entsperrversuche',
-  notifyOnFailedUnlockAttempts: 'Bei fehlgeschlagenen Entsperrversuchen benachrichtigen',
-  securityAlerts: 'Sicherheitswarnungen',
-  receiveImportantSecurityAlerts: 'Wichtige Sicherheitswarnungen erhalten',
-  accessRequests: 'Zugriffsanfragen',
-  notifyWhenSomeoneRequestsAccess: 'Benachrichtigen, wenn jemand Zugriff anfordert',
-  saving: 'Speichern...',
-  saveSettings: 'Einstellungen speichern',
-  settingsSaved: 'Einstellungen gespeichert',
-  notificationSettingsUpdated: 'Benachrichtigungseinstellungen aktualisiert',
-  failedToSaveNotificationSettings: 'Speichern der Benachrichtigungseinstellungen fehlgeschlagen',
-  failedToLoadNotificationSettings: 'Laden der Benachrichtigungseinstellungen fehlgeschlagen',
-  
-  // Key Security
-  autoLock: 'Automatische Sperre',
-  autoLockDescription: 'Tür automatisch sperren, nachdem sie entsperrt wurde',
-  autoLockDelay: 'Verzögerung der automatischen Sperre',
-  minutes: 'Minuten',
-  geofencing: 'Geofencing',
-  geofencingDescription: 'Automatisch sperren/entsperren basierend auf deinem Standort',
-  twoFactorAuth: 'Zwei-Faktor-Authentifizierung',
-  twoFactorAuthDescription: 'Eine zweite Verifizierungsform erforderlich',
-  historyRetention: 'Historienaufbewahrung',
-  historyRetentionDescription: 'Wie lange Aktivitätshistorie aufbewahrt wird',
-  days: 'Tage',
-  unlockNotifications: 'Entsperrbenachrichtigungen',
-  unlockNotificationsDescription: 'Benachrichtigt werden, wenn Schlüssel entsperrt wird',
-  vibrationDetection: 'Vibrationserkennung',
-  vibrationDetectionDescription: 'Mögliche Manipulationsversuche erkennen',
-  securitySettingsUpdated: 'Sicherheitseinstellungen aktualisiert',
-  failedToSaveSecuritySettings: 'Speichern der Sicherheitseinstellungen fehlgeschlagen',
-  failedToLoadSecuritySettings: 'Laden der Sicherheitseinstellungen fehlgeschlagen',
-  
-  // Key Permissions
-  keyPermissions: 'Schlüsselberechtigungen',
-  people: 'Personen',
-  invite: 'Einladen',
-  noUsersHaveAccess: 'Keine Benutzer haben Zugriff auf diesen Schlüssel',
-  canUnlock: 'Kann entsperren',
-  canLock: 'Kann sperren',
-  canViewHistory: 'Kann Verlauf anzeigen',
-  invitationSettings: 'Einladungseinstellungen',
-  allowNewInvitations: 'Neue Einladungen zulassen',
-  enableDisableInvitations: 'Neue Einladungen aktivieren oder deaktivieren',
-  requireApproval: 'Genehmigung erforderlich',
-  approvePeopleBeforeAccess: 'Personen genehmigen, bevor sie Zugriff erhalten',
-  invitePeople: 'Personen einladen',
-  invitePeopleDescription: 'Füge Freunde oder Familie hinzu, um Zugriff auf diesen Schlüssel zu erhalten',
-  friendOrFamilyName: 'Name des Freundes oder Familienmitglieds',
-  optional: 'optional',
-  sending: 'Senden...',
-  sendInvite: 'Einladung senden',
-  
->>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
   // Miscellaneous
   keyNotFound: 'Schlüssel nicht gefunden',
   backToHome: 'Zurück zur Startseite',
   permissionUpdated: 'Berechtigung aktualisiert',
   userPermissionsHaveBeenUpdated: 'Benutzerberechtigungen wurden aktualisiert',
-<<<<<<< HEAD
   failedToUpdatePermission: 'Berechtigung konnte nicht aktualisiert werden',
   accessRemoved: 'Zugriff entfernt',
   userAccessRemoved: 'Benutzerzugriff wurde entfernt',
@@ -366,15 +265,3 @@ export default {
   failedToInviteUser: 'Benutzer konnte nicht eingeladen werden',
   failedToLoadPermissions: 'Berechtigungen konnten nicht geladen werden'
 };
-=======
-  failedToUpdatePermission: 'Aktualisieren der Berechtigung fehlgeschlagen',
-  accessRemoved: 'Zugriff entfernt',
-  userAccessRemoved: 'Benutzerzugriff wurde entfernt',
-  failedToRemoveAccess: 'Entfernen des Zugriffs fehlgeschlagen',
-  invitationSent: 'Einladung gesendet',
-  userWillReceiveEmail: 'Benutzer erhält eine E-Mail mit Anweisungen',
-  userAlreadyHasAccess: 'Dieser Benutzer hat bereits Zugriff',
-  failedToInviteUser: 'Einladen des Benutzers fehlgeschlagen',
-  failedToLoadPermissions: 'Laden der Berechtigungen fehlgeschlagen'
-};
->>>>>>> ec7a6d034b730091c75c44c3c65c9935e7aa7878
