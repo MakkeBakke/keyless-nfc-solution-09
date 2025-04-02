@@ -1,4 +1,3 @@
-
 export default {
   // General
   error: '错误',
@@ -94,8 +93,8 @@ export default {
   languageDesc: '更改应用语言',
   darkMode: '深色模式',
   darkModeDesc: '在浅色和深色主题之间切换',
-  darkModeEnabled: '深色模式已启用',
-  darkModeDisabled: '深色模式已禁用',
+  darkModeEnabled: '已启用深色模式',
+  darkModeDisabled: '已禁用深色模式',
   appThemeDark: '应用主题设置为深色',
   appThemeLight: '应用主题设置为浅色',
   account: '账户',
@@ -184,7 +183,7 @@ export default {
   securitySettingsUpdated: '安全设置已更新',
   failedToSaveSecuritySettings: '无法保存安全设置',
   failedToLoadSecuritySettings: '无法加载安全设置',
-  
+
   // Key Permissions
   keyPermissions: '钥匙权限',
   people: '人',

@@ -14,7 +14,18 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
-import { KeyPermission, getKeyPermissions, addKeyPermission, updateKeyPermission, removeKeyPermission } from '@/utils/localStorageUtils';
+
+// Define the permission type based on the database structure
+interface KeyPermission {
+  id: string;
+  key_id: string;
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  can_unlock: boolean;
+  can_lock: boolean;
+  can_view_history: boolean;
+}
 
 const KeyPermissions = () => {
   const { id } = useParams<{ id: string }>();
@@ -78,9 +89,23 @@ const KeyPermissions = () => {
           setKeyData(data);
         }
         
-        // Get permissions from local storage
-        const keyPermissions = getKeyPermissions(id);
-        setPermissions(keyPermissions);
+        // Fetch permissions from database
+        const { data: permissionsData, error: permissionsError } = await supabase
+          .from('key_permissions')
+          .select('*')
+          .eq('key_id', id);
+          
+        if (permissionsError) {
+          console.error('Error fetching permissions:', permissionsError);
+          toast({
+            title: t('error'),
+            description: t('failedToLoadPermissions'),
+            variant: "destructive",
+          });
+          setPermissions([]);
+        } else {
+          setPermissions(permissionsData || []);
+        }
       } catch (error) {
         console.error('Error:', error);
         toast({
@@ -112,24 +137,35 @@ const KeyPermissions = () => {
           variant: "destructive",
         });
       } else {
-        // Add new permission to localStorage
-        addKeyPermission(
-          id,
-          'generated-id-' + Date.now(), // Simulate a user ID
-          inviteEmail,
-          inviteName || inviteEmail.split('@')[0],
-          canUnlock,
-          canLock,
-          canViewHistory
-        );
+        // Add new permission to database
+        const newPermission = {
+          key_id: id,
+          user_id: 'generated-id-' + Date.now(), // Simulate a user ID
+          user_email: inviteEmail,
+          user_name: inviteName || inviteEmail.split('@')[0],
+          can_unlock: canUnlock,
+          can_lock: canLock,
+          can_view_history: canViewHistory
+        };
+        
+        const { data, error } = await supabase
+          .from('key_permissions')
+          .insert(newPermission)
+          .select();
+        
+        if (error) {
+          throw error;
+        }
         
         toast({
           title: t('invitationSent'),
           description: t('userWillReceiveEmail'),
         });
         
-        // Refresh permissions
-        setPermissions(getKeyPermissions(id));
+        // Add the new permission to the state
+        if (data && data.length > 0) {
+          setPermissions(prev => [...prev, data[0]]);
+        }
         
         // Clear the form
         setInviteEmail('');
@@ -151,10 +187,21 @@ const KeyPermissions = () => {
   const handleUpdatePermission = async (permission: KeyPermission, field: keyof KeyPermission, value: boolean) => {
     try {
       const updatedPermission = { ...permission, [field]: value };
-      updateKeyPermission(id!, updatedPermission);
       
-      // Refresh permissions
-      setPermissions(getKeyPermissions(id!));
+      // Update permission in database
+      const { error } = await supabase
+        .from('key_permissions')
+        .update({ [field]: value })
+        .eq('id', permission.id);
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Update permission in state
+      setPermissions(prev => 
+        prev.map(p => p.id === permission.id ? updatedPermission : p)
+      );
       
       toast({
         title: t('permissionUpdated'),
@@ -172,10 +219,18 @@ const KeyPermissions = () => {
   
   const handleRemovePermission = async (permissionId: string) => {
     try {
-      removeKeyPermission(id!, permissionId);
+      // Remove permission from database
+      const { error } = await supabase
+        .from('key_permissions')
+        .delete()
+        .eq('id', permissionId);
       
-      // Refresh permissions
-      setPermissions(getKeyPermissions(id!));
+      if (error) {
+        throw error;
+      }
+      
+      // Remove permission from state
+      setPermissions(prev => prev.filter(p => p.id !== permissionId));
       
       toast({
         title: t('accessRemoved'),
