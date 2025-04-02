@@ -1,10 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
-import { Plus, Nfc, RefreshCw, Key } from 'lucide-react';
+import { Nfc, RefreshCw, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
 import KeyCard, { KeyData } from '@/components/KeyCard';
-import AddKeyModal from '@/components/AddKeyModal';
 import WelcomeGuide from '@/components/WelcomeGuide';
 import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
@@ -28,7 +27,6 @@ interface KeyRecord {
 const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const [showAddModal, setShowAddModal] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [keys, setKeys] = useState<KeyData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +54,7 @@ const Index = () => {
             id: '1',
             name: 'Front Door (Demo Key 1)',
             type: 'Smart Lock',
-            lastUsed: '2 hours ago',
+            lastUsed: t('demohoursago'),
             isActive: true,
             batteryLevel: 85,
             isLocked: true
@@ -65,7 +63,7 @@ const Index = () => {
             id: '2',
             name: 'Office (Demo Key 2)',
             type: 'Smart Lock',
-            lastUsed: 'Yesterday',
+            lastUsed: t('yesterday'),
             isActive: true,
             batteryLevel: 42,
             isLocked: false
@@ -115,67 +113,6 @@ const Index = () => {
     
     checkSession();
   }, [t]);
-  
-  const handleAddKey = async (keyName: string, keyType: string) => {
-    if (!userId) {
-      // Redirect to profile for login/signup
-      navigate('/profile');
-      return;
-    }
-    
-    try {
-      // Insert new key into database
-      const { data, error } = await supabase
-        .from('keys')
-        .insert({
-          name: keyName,
-          type: keyType,
-          user_id: userId,
-          battery_level: 100,
-          is_active: true,
-          is_locked: true
-        })
-        .select()
-        .single();
-      
-      if (error) {
-        throw error;
-      }
-      
-      // Add to UI
-      const newKey: KeyData = {
-        id: data.id,
-        name: data.name,
-        type: data.type,
-        isActive: data.is_active,
-        batteryLevel: data.battery_level,
-        isLocked: data.is_locked
-      };
-      
-      setKeys([newKey, ...keys]);
-      
-      // Log activity
-      await supabase
-        .from('key_activity')
-        .insert({
-          key_id: data.id,
-          user_id: userId,
-          action: 'create'
-        });
-      
-      toast({
-        title: "Key Added",
-        description: `${keyName} has been added to your keys`,
-      });
-    } catch (error) {
-      console.error('Error adding key:', error);
-      toast({
-        title: "Error",
-        description: "Failed to add key",
-        variant: "destructive",
-      });
-    }
-  };
   
   const handleRefresh = async () => {
     if (!userId) {
@@ -254,19 +191,6 @@ const Index = () => {
               <RefreshCw size={20} className={isRefreshing ? "animate-spin" : ""} />
               <span className="tooltip">{t('refreshKeys')}</span>
             </button>
-            
-            <button 
-              onClick={() => setShowAddModal(true)}
-              className={cn(
-                "w-10 h-10 rounded-full bg-axiv-blue text-white flex items-center justify-center",
-                "shadow-md hover:bg-axiv-blue/90 active:scale-[0.97] transition-all",
-                "tooltip-container"
-              )}
-              aria-label={t('addNewKey')}
-            >
-              <Plus size={20} />
-              <span className="tooltip">{t('addNewKey')}</span>
-            </button>
           </div>
         </div>
         
@@ -286,10 +210,10 @@ const Index = () => {
             <h3 className="text-lg font-medium mb-2">{t('noKeysAdded')}</h3>
             <p className="text-axiv-gray mb-4">{t('addFirstKey')}</p>
             <button 
-              onClick={() => setShowAddModal(true)}
+              onClick={() => navigate('/pair')}
               className="px-4 py-2 bg-axiv-blue text-white rounded-lg hover:bg-axiv-blue/90 transition-colors"
             >
-              {t('addKey')}
+              {t('pairDevice')}
             </button>
           </div>
         ) : (
@@ -337,12 +261,6 @@ const Index = () => {
           </svg>
         </div>
       </section>
-      
-      <AddKeyModal
-        isOpen={showAddModal}
-        onClose={() => setShowAddModal(false)}
-        onAdd={handleAddKey}
-      />
     </div>
   );
 };

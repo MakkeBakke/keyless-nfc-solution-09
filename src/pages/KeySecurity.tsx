@@ -1,215 +1,126 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { 
-  Shield, Lock, Key, Fingerprint, Clock, RefreshCw, AlarmClock
-} from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Shield, ChevronRight, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import Header from '@/components/Header';
-import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Button } from '@/components/ui/button';
+import { Slider } from '@/components/ui/slider';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { useTheme } from '@/contexts/ThemeContext';
-
-// Define types for security settings
-interface SecuritySettings {
-  auto_lock_enabled: boolean;
-  auto_lock_delay: number; // in minutes
-  geofencing_enabled: boolean;
-  two_factor_enabled: boolean;
-  lock_history_retention: number; // in days
-  notify_on_unlock: boolean;
-  vibration_detection: boolean;
-}
+import { supabase } from '@/integrations/supabase/client';
+import Header from '@/components/Header';
+import { KeySecuritySettings, getSecuritySettings, saveSecuritySettings } from '@/utils/localStorageUtils';
 
 const KeySecurity = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { theme } = useTheme();
-  
-  const [keyData, setKeyData] = useState<any>(null);
-  const [securitySettings, setSecuritySettings] = useState<SecuritySettings>({
-    auto_lock_enabled: true,
-    auto_lock_delay: 30,
-    geofencing_enabled: false,
-    two_factor_enabled: false,
-    lock_history_retention: 90,
-    notify_on_unlock: true,
-    vibration_detection: true
-  });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  
+  const [keyData, setKeyData] = useState<any>(null);
+  const [securitySettings, setSecuritySettings] = useState<KeySecuritySettings | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
   useEffect(() => {
-    fetchKeyData();
-    fetchSecuritySettings();
-  }, [id]);
-  
-  const fetchKeyData = async () => {
-    try {
-      if (!id) return;
+    // Check if user is authenticated
+    const checkSession = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
       
-      const { data: keyData, error: keyError } = await supabase
-        .from('keys')
-        .select('*')
-        .eq('id', id)
-        .single();
-      
-      if (keyError) throw keyError;
-      
-      setKeyData(keyData);
-    } catch (error) {
-      console.error('Error fetching key details:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToLoadKeyDetails'),
-        variant: "destructive",
-      });
-    }
-  };
-  
-  const fetchSecuritySettings = async () => {
-    try {
+      if (session?.user) {
+        setUserId(session.user.id);
+      } else {
+        // For demo purposes, set a fake user ID
+        setUserId('demo-user-id');
+      }
+    };
+    
+    checkSession();
+  }, []);
+
+  useEffect(() => {
+    if (!id || !userId) return;
+    
+    const fetchKeyData = async () => {
       setLoading(true);
       
-      if (!id) return;
-      
-      // Get the current user's session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // Demo data for unauthenticated users
-        setSecuritySettings({
-          auto_lock_enabled: true,
-          auto_lock_delay: 30,
-          geofencing_enabled: false,
-          two_factor_enabled: false,
-          lock_history_retention: 90,
-          notify_on_unlock: true,
-          vibration_detection: true
-        });
-        setLoading(false);
-        return;
-      }
-      
-      // Fetch security settings for this key
-      const { data, error } = await supabase
-        .from('key_security_settings')
-        .select('*')
-        .eq('key_id', id)
-        .single();
-      
-      if (error) {
-        if (error.code === 'PGRST116') {
-          // No settings found, use defaults
-          setSecuritySettings({
-            auto_lock_enabled: true,
-            auto_lock_delay: 30,
-            geofencing_enabled: false,
-            two_factor_enabled: false,
-            lock_history_retention: 90,
-            notify_on_unlock: true,
-            vibration_detection: true
+      try {
+        // Fetch key data from database
+        const { data, error } = await supabase
+          .from('keys')
+          .select('*')
+          .eq('id', id)
+          .single();
+        
+        if (error) {
+          // For demo, provide mock data if there's an error
+          setKeyData({
+            id,
+            name: 'Demo Key',
+            type: 'Smart Lock',
+            battery_level: 75,
+            is_active: true,
+            is_locked: true
           });
         } else {
-          throw error;
+          setKeyData(data);
         }
-      } else {
-        setSecuritySettings({
-          auto_lock_enabled: data.auto_lock_enabled,
-          auto_lock_delay: data.auto_lock_delay,
-          geofencing_enabled: data.geofencing_enabled,
-          two_factor_enabled: data.two_factor_enabled,
-          lock_history_retention: data.lock_history_retention,
-          notify_on_unlock: data.notify_on_unlock,
-          vibration_detection: data.vibration_detection
+        
+        // Get security settings from local storage
+        const settings = getSecuritySettings(id, userId);
+        setSecuritySettings(settings);
+      } catch (error) {
+        console.error('Error:', error);
+        toast({
+          title: t('error'),
+          description: t('failedToLoadSecuritySettings'),
+          variant: "destructive",
         });
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error('Error fetching security settings:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToLoadSecuritySettings'),
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
+    };
+    
+    fetchKeyData();
+  }, [id, userId, t]);
   
-  const saveSecuritySettings = async () => {
+  const handleToggleAutoLock = async () => {
+    if (!securitySettings) return;
+    
     try {
-      if (!id) return;
+      const updatedSettings = {
+        ...securitySettings,
+        auto_lock_enabled: !securitySettings.auto_lock_enabled
+      };
       
-      setSaving(true);
-      
-      // Get the current user's session
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (!session) {
-        // Demo mode - just simulate success
-        setTimeout(() => {
-          toast({
-            title: t('settingsSaved'),
-            description: t('securitySettingsUpdated'),
-          });
-          setSaving(false);
-        }, 1000);
-        return;
-      }
-      
-      // Check if settings already exist
-      const { data: existingSettings, error: checkError } = await supabase
-        .from('key_security_settings')
-        .select('id')
-        .eq('key_id', id);
-      
-      if (checkError) throw checkError;
-      
-      if (existingSettings && existingSettings.length > 0) {
-        // Update existing settings
-        const { error: updateError } = await supabase
-          .from('key_security_settings')
-          .update({
-            auto_lock_enabled: securitySettings.auto_lock_enabled,
-            auto_lock_delay: securitySettings.auto_lock_delay,
-            geofencing_enabled: securitySettings.geofencing_enabled,
-            two_factor_enabled: securitySettings.two_factor_enabled,
-            lock_history_retention: securitySettings.lock_history_retention,
-            notify_on_unlock: securitySettings.notify_on_unlock,
-            vibration_detection: securitySettings.vibration_detection
-          })
-          .eq('key_id', id);
-        
-        if (updateError) throw updateError;
-      } else {
-        // Insert new settings
-        const { error: insertError } = await supabase
-          .from('key_security_settings')
-          .insert({
-            key_id: id,
-            auto_lock_enabled: securitySettings.auto_lock_enabled,
-            auto_lock_delay: securitySettings.auto_lock_delay,
-            geofencing_enabled: securitySettings.geofencing_enabled,
-            two_factor_enabled: securitySettings.two_factor_enabled,
-            lock_history_retention: securitySettings.lock_history_retention,
-            notify_on_unlock: securitySettings.notify_on_unlock,
-            vibration_detection: securitySettings.vibration_detection
-          });
-        
-        if (insertError) throw insertError;
-      }
+      setSecuritySettings(updatedSettings);
+      saveSecuritySettings(updatedSettings);
       
       toast({
         title: t('settingsSaved'),
         description: t('securitySettingsUpdated'),
       });
     } catch (error) {
-      console.error('Error saving security settings:', error);
+      console.error('Error toggling auto-lock:', error);
+    }
+  };
+  
+  const handleSaveSettings = async () => {
+    if (!securitySettings) return;
+    
+    setSaving(true);
+    
+    try {
+      // Save to localStorage
+      saveSecuritySettings(securitySettings);
+      
+      toast({
+        title: t('settingsSaved'),
+        description: t('securitySettingsUpdated'),
+      });
+    } catch (error) {
+      console.error('Error saving settings:', error);
       toast({
         title: t('error'),
         description: t('failedToSaveSecuritySettings'),
@@ -220,209 +131,198 @@ const KeySecurity = () => {
     }
   };
   
-  const handleSettingChange = (setting: keyof SecuritySettings, value: any) => {
-    setSecuritySettings(prev => ({
-      ...prev,
-      [setting]: value
-    }));
+  const handleToggleChange = (field: keyof KeySecuritySettings, checked: boolean) => {
+    if (!securitySettings) return;
+    
+    setSecuritySettings({
+      ...securitySettings,
+      [field]: checked
+    });
   };
   
+  const handleSliderChange = (field: keyof KeySecuritySettings, value: number[]) => {
+    if (!securitySettings) return;
+    
+    setSecuritySettings({
+      ...securitySettings,
+      [field]: value[0]
+    });
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-pulse flex flex-col items-center">
-          <div className="w-12 h-12 bg-axiv-light-gray rounded-full mb-4"></div>
-          <div className="h-4 bg-axiv-light-gray rounded w-32 mb-2"></div>
-          <div className="h-3 bg-axiv-light-gray rounded w-24"></div>
+      <div className="min-h-screen pb-24 pt-24 px-4">
+        <Header title={t('security')} showBackButton />
+        <div className="max-w-md mx-auto">
+          <div className="animate-pulse space-y-4">
+            <div className="h-8 bg-gray-200 dark:bg-gray-700 rounded w-3/4"></div>
+            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="h-32 bg-gray-200 dark:bg-gray-700 rounded"></div>
+          </div>
         </div>
       </div>
     );
   }
-  
+
+  if (!keyData) {
+    return (
+      <div className="min-h-screen pb-24 pt-24 px-4">
+        <Header title={t('security')} showBackButton />
+        <div className="max-w-md mx-auto">
+          <div className="glass-card p-8 text-center">
+            <p>{t('keyNotFound')}</p>
+            <Button onClick={() => navigate('/')} className="mt-4">
+              {t('backToHome')}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <motion.div 
       className="min-h-screen pb-24 pt-24 px-4"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.3 }}
     >
-      <Header title={t('securitySettings')} showBackButton />
+      <Header title={t('security')} showBackButton />
       
       <div className="max-w-md mx-auto">
-        <div className="glass-card p-6 mb-6">
-          <div className="flex items-center mb-6">
-            <div className="w-12 h-12 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-              <Shield className="w-6 h-6 text-axiv-blue" />
-            </div>
-            <div>
-              <h2 className="text-xl font-medium">{keyData?.name || t('key')}</h2>
-              <p className="text-axiv-gray text-sm">{t('securitySettings')}</p>
-            </div>
-          </div>
-          
-          <div className="space-y-6">
-            {/* Auto Lock */}
-            <div className="border-b border-axiv-light-gray pb-4">
-              <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-                    <Lock className="w-4 h-4 text-axiv-blue" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{t('autoLock')}</h3>
-                    <p className="text-xs text-axiv-gray">{t('autoLockDescription')}</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={securitySettings.auto_lock_enabled} 
-                  onCheckedChange={(checked) => handleSettingChange('auto_lock_enabled', checked)}
-                />
+        <div className="mb-4">
+          <h2 className="text-2xl font-medium dark:text-white">{t('key')}: {keyData.name}</h2>
+        </div>
+        
+        <div className="glass-card mb-4 p-0 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium dark:text-white">{t('autoLock')}</h3>
+                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
+                  {t('autoLockDescription')}
+                </p>
               </div>
-              
-              {securitySettings.auto_lock_enabled && (
-                <div className="ml-11 mt-3">
-                  <label className="block text-sm mb-1">{t('autoLockDelay')}</label>
-                  <div className="flex items-center">
-                    <input
-                      type="range"
-                      min="1"
-                      max="120"
-                      value={securitySettings.auto_lock_delay}
-                      onChange={(e) => handleSettingChange('auto_lock_delay', parseInt(e.target.value))}
-                      className="w-full mr-3"
+              <Switch 
+                checked={securitySettings?.auto_lock_enabled || false}
+                onCheckedChange={() => handleToggleAutoLock()}
+              />
+            </div>
+            
+            {securitySettings?.auto_lock_enabled && (
+              <div className="mt-4">
+                <h4 className="text-sm font-medium mb-2 dark:text-gray-300">{t('autoLockDelay')}</h4>
+                <div className="flex items-center">
+                  <div className="flex-1 pr-4">
+                    <Slider 
+                      value={[securitySettings?.auto_lock_delay || 30]} 
+                      min={1} 
+                      max={120} 
+                      step={1} 
+                      onValueChange={(value) => handleSliderChange('auto_lock_delay', value)} 
                     />
-                    <span className="text-sm whitespace-nowrap">
-                      {securitySettings.auto_lock_delay} {t('minutes')}
-                    </span>
                   </div>
-                </div>
-              )}
-            </div>
-            
-            {/* Geofencing */}
-            <div className="border-b border-axiv-light-gray pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-                    <Key className="w-4 h-4 text-axiv-blue" />
+                  <div className="w-16 text-right text-sm dark:text-gray-300">
+                    {securitySettings?.auto_lock_delay || 30} {t('minutes')}
                   </div>
-                  <div>
-                    <h3 className="font-medium">{t('geofencing')}</h3>
-                    <p className="text-xs text-axiv-gray">{t('geofencingDescription')}</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={securitySettings.geofencing_enabled} 
-                  onCheckedChange={(checked) => handleSettingChange('geofencing_enabled', checked)}
-                />
-              </div>
-            </div>
-            
-            {/* Two-factor authentication */}
-            <div className="border-b border-axiv-light-gray pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-                    <Fingerprint className="w-4 h-4 text-axiv-blue" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{t('twoFactorAuth')}</h3>
-                    <p className="text-xs text-axiv-gray">{t('twoFactorAuthDescription')}</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={securitySettings.two_factor_enabled} 
-                  onCheckedChange={(checked) => handleSettingChange('two_factor_enabled', checked)}
-                />
-              </div>
-            </div>
-            
-            {/* History Retention */}
-            <div className="border-b border-axiv-light-gray pb-4">
-              <div className="flex items-center mb-3">
-                <div className="w-8 h-8 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-                  <Clock className="w-4 h-4 text-axiv-blue" />
-                </div>
-                <div>
-                  <h3 className="font-medium">{t('historyRetention')}</h3>
-                  <p className="text-xs text-axiv-gray">{t('historyRetentionDescription')}</p>
                 </div>
               </div>
-              
-              <div className="ml-11 mt-2">
-                <div className="flex items-center">
-                  <input
-                    type="range"
-                    min="7"
-                    max="365"
-                    step="7"
-                    value={securitySettings.lock_history_retention}
-                    onChange={(e) => handleSettingChange('lock_history_retention', parseInt(e.target.value))}
-                    className="w-full mr-3"
-                  />
-                  <span className="text-sm whitespace-nowrap">
-                    {securitySettings.lock_history_retention} {t('days')}
-                  </span>
-                </div>
+            )}
+          </div>
+          
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium dark:text-white">{t('geofencing')}</h3>
+                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
+                  {t('geofencingDescription')}
+                </p>
               </div>
+              <Switch 
+                checked={securitySettings?.geofencing_enabled || false}
+                onCheckedChange={(checked) => handleToggleChange('geofencing_enabled', checked)}
+              />
             </div>
-            
-            {/* Unlock Notifications */}
-            <div className="border-b border-axiv-light-gray pb-4">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-                    <AlarmClock className="w-4 h-4 text-axiv-blue" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{t('unlockNotifications')}</h3>
-                    <p className="text-xs text-axiv-gray">{t('unlockNotificationsDescription')}</p>
-                  </div>
-                </div>
-                <Switch 
-                  checked={securitySettings.notify_on_unlock} 
-                  onCheckedChange={(checked) => handleSettingChange('notify_on_unlock', checked)}
-                />
+          </div>
+          
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium dark:text-white">{t('twoFactorAuth')}</h3>
+                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
+                  {t('twoFactorAuthDescription')}
+                </p>
               </div>
+              <Switch 
+                checked={securitySettings?.two_factor_enabled || false}
+                onCheckedChange={(checked) => handleToggleChange('two_factor_enabled', checked)}
+              />
             </div>
-            
-            {/* Vibration Detection */}
+          </div>
+          
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
             <div>
-              <div className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <div className="w-8 h-8 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-                    <RefreshCw className="w-4 h-4 text-axiv-blue" />
-                  </div>
-                  <div>
-                    <h3 className="font-medium">{t('vibrationDetection')}</h3>
-                    <p className="text-xs text-axiv-gray">{t('vibrationDetectionDescription')}</p>
-                  </div>
+              <h3 className="font-medium mb-2 dark:text-white">{t('historyRetention')}</h3>
+              <p className="text-sm text-axiv-gray dark:text-gray-400 mb-3">
+                {t('historyRetentionDescription')}
+              </p>
+              
+              <div className="flex items-center">
+                <div className="flex-1 pr-4">
+                  <Slider 
+                    value={[securitySettings?.lock_history_retention || 30]} 
+                    min={7} 
+                    max={90} 
+                    step={1} 
+                    onValueChange={(value) => handleSliderChange('lock_history_retention', value)} 
+                  />
                 </div>
-                <Switch 
-                  checked={securitySettings.vibration_detection} 
-                  onCheckedChange={(checked) => handleSettingChange('vibration_detection', checked)}
-                />
+                <div className="w-16 text-right text-sm dark:text-gray-300">
+                  {securitySettings?.lock_history_retention || 30} {t('days')}
+                </div>
               </div>
             </div>
           </div>
           
-          <div className="mt-8">
-            <Button 
-              className="w-full" 
-              onClick={saveSecuritySettings}
-              disabled={saving}
-            >
-              {saving ? (
-                <>
-                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full"></div>
-                  {t('saving')}
-                </>
-              ) : (
-                t('saveSettings')
-              )}
-            </Button>
+          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium dark:text-white">{t('unlockNotifications')}</h3>
+                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
+                  {t('unlockNotificationsDescription')}
+                </p>
+              </div>
+              <Switch 
+                checked={securitySettings?.notify_on_unlock || false}
+                onCheckedChange={(checked) => handleToggleChange('notify_on_unlock', checked)}
+              />
+            </div>
           </div>
+          
+          <div className="p-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <h3 className="font-medium dark:text-white">{t('vibrationDetection')}</h3>
+                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
+                  {t('vibrationDetectionDescription')}
+                </p>
+              </div>
+              <Switch 
+                checked={securitySettings?.vibration_detection || false}
+                onCheckedChange={(checked) => handleToggleChange('vibration_detection', checked)}
+              />
+            </div>
+          </div>
+        </div>
+        
+        <div className="flex justify-end">
+          <Button 
+            onClick={handleSaveSettings} 
+            className="bg-axiv-blue hover:bg-axiv-blue/90 text-white transition-colors"
+            disabled={saving}
+          >
+            {saving ? t('saving') : t('saveSettings')}
+          </Button>
         </div>
       </div>
     </motion.div>

@@ -1,11 +1,9 @@
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Key, Clock, Battery, BatteryCharging } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { motion } from 'framer-motion';
-import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useTheme } from '@/contexts/ThemeContext';
 
@@ -26,7 +24,7 @@ interface KeyCardProps {
 const KeyCard = ({ keyData }: KeyCardProps) => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { theme } = useTheme();
+  const { isDark } = useTheme();
   
   const handleCardClick = () => {
     navigate(`/key/${keyData.id}`);
@@ -50,7 +48,7 @@ const KeyCard = ({ keyData }: KeyCardProps) => {
       className={cn(
         "glass-card p-5 cursor-pointer transition-all duration-300",
         "hover:shadow-md active:scale-[0.98] mb-4 relative overflow-hidden",
-        "dark:bg-gray-800 dark:border-gray-700"
+        isDark ? "bg-gray-800 border-gray-700" : ""
       )}
       onClick={handleCardClick}
       initial={{ opacity: 0, y: 20 }}

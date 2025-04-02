@@ -41,6 +41,53 @@ export type Database = {
           },
         ]
       }
+      key_permissions: {
+        Row: {
+          can_lock: boolean
+          can_unlock: boolean
+          can_view_history: boolean
+          created_at: string
+          id: string
+          key_id: string
+          updated_at: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }
+        Insert: {
+          can_lock?: boolean
+          can_unlock?: boolean
+          can_view_history?: boolean
+          created_at?: string
+          id?: string
+          key_id: string
+          updated_at?: string
+          user_email: string
+          user_id: string
+          user_name: string
+        }
+        Update: {
+          can_lock?: boolean
+          can_unlock?: boolean
+          can_view_history?: boolean
+          created_at?: string
+          id?: string
+          key_id?: string
+          updated_at?: string
+          user_email?: string
+          user_id?: string
+          user_name?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "key_permissions_key_id_fkey"
+            columns: ["key_id"]
+            isOneToOne: false
+            referencedRelation: "keys"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       keys: {
         Row: {
           battery_level: number | null

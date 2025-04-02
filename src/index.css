@@ -114,7 +114,7 @@
 
 @layer utilities {
   .glass {
-    @apply bg-white/70 backdrop-blur-md border border-white/20;
+    @apply bg-white/70 backdrop-blur-md border border-white/20 dark:bg-gray-800/70 dark:border-gray-700/30;
   }
   
   .glass-card {
@@ -175,4 +175,28 @@
 
 .animate-pulse-ring {
   animation: pulse-ring 1.5s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+}
+
+/* Dark mode input fixes */
+.dark input,
+.dark select,
+.dark textarea {
+  @apply bg-gray-800 text-white border-gray-700 focus:border-blue-500;
+}
+
+.dark input::placeholder {
+  @apply text-gray-400;
+}
+
+.dark .glass-card {
+  @apply bg-gray-800/90 border-gray-700/50;
+}
+
+.dark .bg-axiv-light-gray {
+  @apply bg-gray-800;
+}
+
+/* Ensures all modals have proper background in dark mode */
+.dark [role="dialog"] {
+  @apply bg-gray-800/90 text-white border-gray-700;
 }
