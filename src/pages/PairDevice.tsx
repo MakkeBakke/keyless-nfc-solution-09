@@ -20,7 +20,7 @@ const PairDevice = () => {
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
   const [nfcPermissionGranted, setNfcPermissionGranted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [nfcId, setNfcId] = useState<string | null>(null);
+  const [nfcDeviceId, setNfcDeviceId] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -100,7 +100,7 @@ const PairDevice = () => {
             console.log("Serial number:", event.serialNumber);
             
             // Store the NFC identifier for later use
-            setNfcId(event.serialNumber);
+            setNfcDeviceId(event.serialNumber);
 
             // Successfully read an NFC tag
             nfcDetected = true;
@@ -200,7 +200,7 @@ const PairDevice = () => {
           battery_level: 100,
           is_active: true,
           is_locked: true,
-          nfc_id: nfcId // Store the NFC identifier
+          nfc_device_id: nfcDeviceId // Store the NFC device ID
         })
         .select()
         .single();

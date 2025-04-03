@@ -198,7 +198,7 @@ const KeyDetail = () => {
           });
       }
       
-      // Simulate unlock/lock delay
+      // Simulate unlock delay
       setTimeout(() => {
         // Update the local key data
         if (keyData) {

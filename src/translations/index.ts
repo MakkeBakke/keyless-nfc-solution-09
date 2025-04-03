@@ -76,7 +76,6 @@ export type TranslationKey =
   | "approvePeopleBeforeAccess"
   | "failedToLoadPermissions"
   | "demohoursago"
-  // Adding missing translation keys to fix the build errors
   | "locking"
   | "unlocking"
   | "securingDevice"
@@ -217,9 +216,6 @@ export type TranslationKey =
   | "securitySettingsUpdated"
   | "failedToSaveSecuritySettings"
   | "failedToLoadSecuritySettings"
-  // New keys for NFC functionality
-  | "holdToUnlock"
-  | "releaseToCancel"
   | "nfcWriting"
   | "nfcWriteSuccess"
   | "nfcWriteError"
@@ -234,8 +230,7 @@ export type TranslationKey =
   | "used"
   | "failed"
   | "tapToUnlock"
-  | "placePhoneNearReader"
-  ;
+  | "placePhoneNearReader";
 
 const translations = {
   english,

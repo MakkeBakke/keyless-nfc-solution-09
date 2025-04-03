@@ -97,6 +97,7 @@ export type Database = {
           is_locked: boolean
           last_used: string | null
           name: string
+          nfc_device_id: string | null
           type: string
           updated_at: string
           user_id: string
@@ -109,6 +110,7 @@ export type Database = {
           is_locked?: boolean
           last_used?: string | null
           name: string
+          nfc_device_id?: string | null
           type: string
           updated_at?: string
           user_id: string
@@ -121,6 +123,7 @@ export type Database = {
           is_locked?: boolean
           last_used?: string | null
           name?: string
+          nfc_device_id?: string | null
           type?: string
           updated_at?: string
           user_id?: string
