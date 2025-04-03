@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
-  Key, Lock, Unlock, Calendar, Battery, Share2, Settings, BellRing, 
-  AlertTriangle, Trash2, ChevronRight, Nfc
+  Key, Calendar, Battery, Share2, Settings, BellRing, 
+  AlertTriangle, Trash2, ChevronRight, Nfc, Unlock
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -23,6 +24,7 @@ import ActivityItem from '@/components/ActivityItem';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
 
 // Type definition to match the Supabase database structure
 interface KeyRecord {
@@ -36,6 +38,7 @@ interface KeyRecord {
   updated_at: string;
   user_id: string;
   is_locked: boolean;
+  nfc_device_id?: string;
 }
 
 interface KeyActivityRecord {
@@ -52,20 +55,14 @@ const KeyDetail = () => {
   const { t } = useLanguage();
   
   const [keyData, setKeyData] = useState<KeyRecord | null>(null);
-  const [isLocked, setIsLocked] = useState(true);
   const [showAnimation, setShowAnimation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState<KeyActivityRecord[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [isPressing, setIsPressing] = useState(false);
-  const [pressDuration, setPressDuration] = useState(0);
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
   const [isWritingToNfc, setIsWritingToNfc] = useState(false);
   const [nfcWriteSuccess, setNfcWriteSuccess] = useState<boolean | null>(null);
   const [nfcWriteErrorMessage, setNfcWriteErrorMessage] = useState<string | null>(null);
-
-  const pressTimer = useRef<NodeJS.Timeout | null>(null);
-  const requiredPressTime = 2000; // 2 seconds press to unlock
   
   useEffect(() => {
     const fetchKeyData = async () => {
@@ -87,11 +84,11 @@ const KeyDetail = () => {
             last_used: new Date().toISOString(),
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
-            user_id: 'demo'
+            user_id: 'demo',
+            nfc_device_id: 'demo-nfc-id'
           };
           
           setKeyData(demoKey);
-          setIsLocked(demoKey.is_locked);
           setLoading(false);
           
           setActivities([
@@ -126,7 +123,6 @@ const KeyDetail = () => {
         }
         
         setKeyData(keyData as KeyRecord);
-        setIsLocked(keyData.is_locked);
         
         // Fetch recent activity for this key
         const { data: activityData, error: activityError } = await supabase
@@ -172,7 +168,7 @@ const KeyDetail = () => {
     }
   };
   
-  const handleToggleLock = async () => {
+  const handleUnlock = async () => {
     if (!keyData) return;
     
     setShowAnimation(true);
@@ -182,11 +178,10 @@ const KeyDetail = () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // Update the key's lock state in the database
+        // Update the key's last_used timestamp in the database
         const { error: updateError } = await supabase
           .from('keys')
           .update({ 
-            is_locked: !isLocked,
             last_used: new Date().toISOString() 
           })
           .eq('id', keyData.id);
@@ -199,32 +194,28 @@ const KeyDetail = () => {
           .insert({
             key_id: keyData.id,
             user_id: session.user.id,
-            action: isLocked ? 'unlock' : 'lock'
+            action: 'unlock'
           });
       }
       
       // Simulate unlock/lock delay
       setTimeout(() => {
-        setIsLocked(!isLocked);
-        
         // Update the local key data
         if (keyData) {
           setKeyData({
             ...keyData,
-            is_locked: !isLocked,
             last_used: new Date().toISOString()
           });
         }
         
         setShowAnimation(false);
         
-        // Fix: Use string interpolation manually instead of relying on t() to handle it
+        // Show success message
         const keyUnlockedMsg = t('keyUnlocked').replace('{keyName}', keyData.name);
-        const keyLockedMsg = t('keyLocked').replace('{keyName}', keyData.name);
         
         toast({
-          title: isLocked ? keyUnlockedMsg : keyLockedMsg,
-          description: isLocked ? t('successfullyUnlocked') : t('successfullyLocked'),
+          title: keyUnlockedMsg,
+          description: t('successfullyUnlocked'),
         });
         
         // Add to local activity list
@@ -233,20 +224,18 @@ const KeyDetail = () => {
             id: Date.now().toString(),
             key_id: keyData.id,
             user_id: session.user.id,
-            action: isLocked ? 'unlock' : 'lock',
+            action: 'unlock',
             performed_at: new Date().toISOString()
           };
           
           setActivities([newActivity, ...activities]);
         }
 
-        // If unlocking, prompt to write to NFC
-        if (isLocked && nfcSupported) {
-          writeToNfc(keyData.id, keyData.name);
-        }
+        // Write to NFC
+        writeToNfc(keyData.id, keyData.name, keyData.nfc_device_id);
       }, 2000);
     } catch (error) {
-      console.error('Error toggling lock state:', error);
+      console.error('Error unlocking:', error);
       setShowAnimation(false);
       toast({
         title: t('error'),
@@ -256,35 +245,7 @@ const KeyDetail = () => {
     }
   };
 
-  const startPress = () => {
-    if (!keyData || isPressing) return;
-    
-    setIsPressing(true);
-    setPressDuration(0);
-    
-    pressTimer.current = setInterval(() => {
-      setPressDuration(prev => {
-        const newDuration = prev + 100;
-        if (newDuration >= requiredPressTime) {
-          clearInterval(pressTimer.current as NodeJS.Timeout);
-          handleToggleLock();
-        }
-        return newDuration;
-      });
-    }, 100);
-  };
-  
-  const endPress = () => {
-    if (pressTimer.current) {
-      clearInterval(pressTimer.current);
-      pressTimer.current = null;
-    }
-    
-    setIsPressing(false);
-    setPressDuration(0);
-  };
-
-  const writeToNfc = async (keyId: string, keyName: string) => {
+  const writeToNfc = async (keyId: string, keyName: string, nfcDeviceId?: string) => {
     if (!nfcSupported) {
       toast({
         title: t('error'),
@@ -304,7 +265,7 @@ const KeyDetail = () => {
       
       await ndef.write({
         records: [
-          { recordType: "text", data: `key:${keyId}:${keyName}` },
+          { recordType: "text", data: `key:${keyId}:${keyName}:${nfcDeviceId || ''}` },
           { recordType: "url", data: `https://axiv.app/key/${keyId}` }
         ]
       });
@@ -404,7 +365,7 @@ const KeyDetail = () => {
       
       <div className="max-w-md mx-auto">
         <div className="glass-card p-6 relative overflow-hidden">
-          {showAnimation && <UnlockAnimation isLocked={!isLocked} />}
+          {showAnimation && <UnlockAnimation keyName={keyData.name} />}
           
           <div className="flex flex-col items-center justify-center mb-6 relative z-0">
             <div className={cn(
@@ -421,77 +382,39 @@ const KeyDetail = () => {
             <h2 className="text-2xl font-medium mb-1">{keyData.name}</h2>
             <p className="text-axiv-gray">{keyData.type}</p>
             
-            <div className="mt-6 w-full max-w-xs">
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-sm text-axiv-gray">{t('lockStatus')}</span>
-                <span className={cn(
-                  "text-sm font-medium",
-                  isLocked ? "text-red-500" : "text-green-500"
-                )}>
-                  {isLocked ? t('locked') : t('unlocked')}
-                </span>
-              </div>
-              
+            <div className="mt-8 w-full max-w-xs flex flex-col items-center">
               {isWritingToNfc ? (
-                <div className="w-full py-3 bg-axiv-blue/80 text-white rounded-lg flex flex-col items-center justify-center">
-                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mb-2"></div>
-                  <span>{t('nfcWriting')}</span>
-                  <p className="text-xs mt-1">{t('presentPhoneToLock')}</p>
+                <div className="w-40 h-40 rounded-full bg-axiv-blue/80 text-white flex flex-col items-center justify-center">
+                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent mb-3"></div>
+                  <span className="text-center px-4">{t('nfcWriting')}</span>
+                  <p className="text-xs mt-2 text-center px-4">{t('presentPhoneToLock')}</p>
                 </div>
               ) : (
                 <button
-                  onMouseDown={startPress}
-                  onMouseUp={endPress}
-                  onMouseLeave={endPress}
-                  onTouchStart={startPress}
-                  onTouchEnd={endPress}
-                  className={cn(
-                    "w-full py-3 rounded-lg flex items-center justify-center transition-all relative overflow-hidden",
-                    isLocked 
-                      ? "bg-green-500 text-white hover:bg-green-600"
-                      : "bg-red-500 text-white hover:bg-red-600" 
-                  )}
+                  onClick={handleUnlock}
+                  className="w-40 h-40 rounded-full bg-green-500 text-white flex flex-col items-center justify-center hover:bg-green-600 transition-colors shadow-lg active:scale-95"
                 >
-                  {isPressing && (
-                    <div 
-                      className="absolute left-0 top-0 bottom-0 bg-white/20"
-                      style={{ width: `${(pressDuration / requiredPressTime) * 100}%` }}
-                    ></div>
-                  )}
-                  <div className="flex items-center justify-center relative z-10">
-                    {isLocked ? (
-                      <>
-                        <Unlock className="w-5 h-5 mr-2" />
-                        {isPressing ? t('holdToUnlock') : t('holdKeyToUnlock')}
-                      </>
-                    ) : (
-                      <>
-                        <Lock className="w-5 h-5 mr-2" />
-                        {isPressing ? t('releaseToCancel') : t('lock')}
-                      </>
-                    )}
-                  </div>
+                  <Unlock className="w-12 h-12 mb-2" />
+                  <span className="text-lg font-medium">{t('tapToUnlock')}</span>
+                  <p className="text-xs mt-1 text-center px-4">{t('placePhoneNearReader')}</p>
                 </button>
               )}
               
               {nfcWriteSuccess === false && nfcWriteErrorMessage && (
-                <p className="text-red-500 text-xs mt-2 text-center">{nfcWriteErrorMessage}</p>
+                <p className="text-red-500 text-xs mt-4 text-center">{nfcWriteErrorMessage}</p>
               )}
               
-              {!isLocked && nfcSupported && (
-                <button
-                  onClick={() => writeToNfc(keyData.id, keyData.name)}
-                  className="w-full mt-3 py-2 border border-axiv-blue text-axiv-blue rounded-lg flex items-center justify-center transition-colors hover:bg-axiv-blue/10"
-                  disabled={isWritingToNfc}
-                >
-                  <Nfc className="w-4 h-4 mr-2" />
-                  {t('nfcWriteInstructions')}
-                </button>
+              {nfcSupported === false && (
+                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                  <p className="text-yellow-700 text-sm text-center">
+                    <span className="font-medium">Note:</span> NFC is not supported on this device or browser.
+                  </p>
+                </div>
               )}
             </div>
           </div>
           
-          <div className="border-t border-axiv-light-gray pt-4">
+          <div className="border-t border-axiv-light-gray pt-4 mt-4">
             <h3 className="font-medium mb-3">{t('keyInformation')}</h3>
             
             <div className="space-y-3">
@@ -538,6 +461,18 @@ const KeyDetail = () => {
                   </span>
                 </div>
               </div>
+              
+              {keyData.nfc_device_id && (
+                <div className="flex justify-between items-center">
+                  <span className="text-sm text-axiv-gray">NFC ID</span>
+                  <div className="flex items-center">
+                    <Nfc className="w-4 h-4 mr-1.5 text-axiv-gray" />
+                    <span className="text-sm">
+                      {keyData.nfc_device_id.substring(0, 8)}...
+                    </span>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>

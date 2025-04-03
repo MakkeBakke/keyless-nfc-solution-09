@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { LockKeyhole, KeyRound, ShieldCheck, Shield, Nfc } from 'lucide-react';
+import { Unlock, Nfc, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -66,38 +66,30 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false }: 
               "absolute w-24 h-24 rounded-full animate-pulse-ring",
               isNfcWrite
                 ? "bg-axiv-blue/20 dark:bg-axiv-blue/10"
-                : isLocked 
-                  ? "bg-red-500/20 dark:bg-red-500/10" 
-                  : "bg-green-500/20 dark:bg-green-500/10"
+                : "bg-green-500/20 dark:bg-green-500/10"
             )}></div>
             <div className={cn(
               "absolute w-24 h-24 rounded-full animate-pulse-ring animation-delay-200",
               isNfcWrite
                 ? "bg-axiv-blue/30 dark:bg-axiv-blue/20"
-                : isLocked 
-                  ? "bg-red-500/30 dark:bg-red-500/20" 
-                  : "bg-green-500/30 dark:bg-green-500/20"
+                : "bg-green-500/30 dark:bg-green-500/20"
             )}></div>
             <div className={cn(
               "absolute w-24 h-24 rounded-full animate-pulse-ring animation-delay-400",
               isNfcWrite
                 ? "bg-axiv-blue/40 dark:bg-axiv-blue/30"
-                : isLocked 
-                  ? "bg-red-500/40 dark:bg-red-500/30" 
-                  : "bg-green-500/40 dark:bg-green-500/30"
+                : "bg-green-500/40 dark:bg-green-500/30"
             )}></div>
             
             {/* Place the icon inside the pulsing rings */}
             <motion.div 
               className={cn(
                 "relative z-10 w-28 h-28 rounded-full flex items-center justify-center text-white shadow-lg",
-                isNfcWrite
-                  ? "bg-axiv-blue"
-                  : isLocked ? "bg-red-500" : "bg-green-500"
+                isNfcWrite ? "bg-axiv-blue" : "bg-green-500"
               )}
               initial={{ rotate: 0 }}
               animate={{ 
-                rotate: isLocked ? [0, -10, 0, 10, 0] : [0, 10, 0, -10, 0],
+                rotate: [0, 10, 0, -10, 0],
                 scale: [1, 1.05, 1, 1.05, 1]
               }}
               transition={{ 
@@ -108,8 +100,6 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false }: 
             >
               {isNfcWrite ? (
                 <Nfc size={40} className="drop-shadow-md" />
-              ) : isLocked ? (
-                <Shield size={40} className="drop-shadow-md" />
               ) : (
                 <ShieldCheck size={40} className="drop-shadow-md" />
               )}
@@ -130,9 +120,7 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false }: 
             >
               {isNfcWrite ? 
                 (keyName ? `${t('nfcWriting')} ${keyName}...` : t('nfcWriting')) :
-                isLocked ? 
-                  (keyName ? `${t('locking')} ${keyName}...` : t('locking')) : 
-                  (keyName ? `${t('unlocking')} ${keyName}...` : t('unlocking'))}
+                (keyName ? `${t('unlocking')} ${keyName}...` : t('unlocking'))}
             </motion.p>
             <motion.p 
               className="text-axiv-gray dark:text-gray-300 text-sm"
@@ -142,7 +130,7 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false }: 
             >
               {isNfcWrite ? 
                 t('nfcWriteInstructions') :
-                isLocked ? t('securingDevice') : t('accessGranted')}
+                t('accessGranted')}
             </motion.p>
           </motion.div>
           
@@ -156,7 +144,7 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false }: 
             <motion.div 
               className={cn(
                 "h-full rounded-full",
-                isNfcWrite ? "bg-axiv-blue" : (isLocked ? "bg-axiv-blue" : "bg-green-500")
+                isNfcWrite ? "bg-axiv-blue" : "bg-green-500"
               )}
               initial={{ width: 0 }}
               animate={{ width: "100%" }}

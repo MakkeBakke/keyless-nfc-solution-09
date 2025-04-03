@@ -233,6 +233,8 @@ export type TranslationKey =
   | "edited"
   | "used"
   | "failed"
+  | "tapToUnlock"
+  | "placePhoneNearReader"
   ;
 
 const translations = {
