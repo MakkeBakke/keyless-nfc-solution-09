@@ -230,7 +230,9 @@ export type TranslationKey =
   | "used"
   | "failed"
   | "tapToUnlock"
-  | "placePhoneNearReader";
+  | "placePhoneNearReader"
+  | "emulatingNFC"
+  | "holdPhoneToReader";
 
 const translations = {
   english,

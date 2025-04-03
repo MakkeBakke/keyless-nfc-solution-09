@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -60,9 +59,9 @@ const KeyDetail = () => {
   const [activities, setActivities] = useState<KeyActivityRecord[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
-  const [isWritingToNfc, setIsWritingToNfc] = useState(false);
-  const [nfcWriteSuccess, setNfcWriteSuccess] = useState<boolean | null>(null);
-  const [nfcWriteErrorMessage, setNfcWriteErrorMessage] = useState<string | null>(null);
+  const [isNfcEmulating, setIsNfcEmulating] = useState(false);
+  const [nfcEmulationSuccess, setNfcEmulationSuccess] = useState<boolean | null>(null);
+  const [nfcErrorMessage, setNfcErrorMessage] = useState<string | null>(null);
   
   useEffect(() => {
     const fetchKeyData = async () => {
@@ -167,11 +166,21 @@ const KeyDetail = () => {
       setNfcSupported(false);
     }
   };
-  
-  const handleUnlock = async () => {
+
+  const emulateNfc = async () => {
     if (!keyData) return;
-    
+    if (!nfcSupported) {
+      toast({
+        title: t('error'),
+        description: "NFC is not supported on this device. Please use a device with NFC capabilities.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setShowAnimation(true);
+    setIsNfcEmulating(true);
+    setNfcErrorMessage(null);
     
     try {
       // Check authentication
@@ -197,8 +206,12 @@ const KeyDetail = () => {
             action: 'unlock'
           });
       }
+
+      // This is where we'd normally try to emulate the NFC tag
+      // Since the Web NFC API doesn't support tag emulation directly,
+      // we'll simulate it for demonstration purposes
       
-      // Simulate unlock delay
+      // Simulate NFC emulation delay
       setTimeout(() => {
         // Update the local key data
         if (keyData) {
@@ -209,12 +222,11 @@ const KeyDetail = () => {
         }
         
         setShowAnimation(false);
+        setIsNfcEmulating(false);
         
         // Show success message
-        const keyUnlockedMsg = t('keyUnlocked').replace('{keyName}', keyData.name);
-        
         toast({
-          title: keyUnlockedMsg,
+          title: t('keyUnlocked'),
           description: t('successfullyUnlocked'),
         });
         
@@ -230,62 +242,18 @@ const KeyDetail = () => {
           
           setActivities([newActivity, ...activities]);
         }
-
-        // Write to NFC
-        writeToNfc(keyData.id, keyData.name, keyData.nfc_device_id);
-      }, 2000);
+      }, 3000);
     } catch (error) {
-      console.error('Error unlocking:', error);
+      console.error('Error emulating NFC:', error);
       setShowAnimation(false);
+      setIsNfcEmulating(false);
+      setNfcErrorMessage((error as Error).message);
+      
       toast({
         title: t('error'),
         description: t('failedToUpdateKeyState'),
         variant: "destructive",
       });
-    }
-  };
-
-  const writeToNfc = async (keyId: string, keyName: string, nfcDeviceId?: string) => {
-    if (!nfcSupported) {
-      toast({
-        title: t('error'),
-        description: "NFC is not supported on this device",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    setIsWritingToNfc(true);
-    setNfcWriteSuccess(null);
-    setNfcWriteErrorMessage(null);
-
-    try {
-      // @ts-ignore - NDEFReader might not be recognized by TypeScript
-      const ndef = new NDEFReader();
-      
-      await ndef.write({
-        records: [
-          { recordType: "text", data: `key:${keyId}:${keyName}:${nfcDeviceId || ''}` },
-          { recordType: "url", data: `https://axiv.app/key/${keyId}` }
-        ]
-      });
-      
-      setNfcWriteSuccess(true);
-      toast({
-        title: t('nfcWriteSuccess'),
-        description: t('nfcSuccessfullyWritten'),
-      });
-    } catch (error) {
-      console.error('Error writing to NFC tag:', error);
-      setNfcWriteSuccess(false);
-      setNfcWriteErrorMessage((error as Error).message);
-      toast({
-        title: t('nfcWriteError'),
-        description: t('nfcWriteFailed'),
-        variant: "destructive",
-      });
-    } finally {
-      setIsWritingToNfc(false);
     }
   };
   
@@ -365,7 +333,12 @@ const KeyDetail = () => {
       
       <div className="max-w-md mx-auto">
         <div className="glass-card p-6 relative overflow-hidden">
-          {showAnimation && <UnlockAnimation keyName={keyData.name} />}
+          {showAnimation && 
+            <UnlockAnimation 
+              keyName={keyData.name} 
+              isNfcEmulation={isNfcEmulating} 
+            />
+          }
           
           <div className="flex flex-col items-center justify-center mb-6 relative z-0">
             <div className={cn(
@@ -383,31 +356,25 @@ const KeyDetail = () => {
             <p className="text-axiv-gray">{keyData.type}</p>
             
             <div className="mt-8 w-full max-w-xs flex flex-col items-center">
-              {isWritingToNfc ? (
-                <div className="w-40 h-40 rounded-full bg-axiv-blue/80 text-white flex flex-col items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-4 border-white border-t-transparent mb-3"></div>
-                  <span className="text-center px-4">{t('nfcWriting')}</span>
-                  <p className="text-xs mt-2 text-center px-4">{t('presentPhoneToLock')}</p>
-                </div>
-              ) : (
-                <button
-                  onClick={handleUnlock}
-                  className="w-40 h-40 rounded-full bg-green-500 text-white flex flex-col items-center justify-center hover:bg-green-600 transition-colors shadow-lg active:scale-95"
-                >
-                  <Unlock className="w-12 h-12 mb-2" />
-                  <span className="text-lg font-medium">{t('tapToUnlock')}</span>
-                  <p className="text-xs mt-1 text-center px-4">{t('placePhoneNearReader')}</p>
-                </button>
-              )}
+              <button
+                onClick={emulateNfc}
+                disabled={isNfcEmulating}
+                className="w-40 h-40 rounded-full bg-axiv-blue text-white flex flex-col items-center justify-center hover:bg-axiv-blue/90 transition-colors shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <Nfc className="w-12 h-12 mb-2" />
+                <span className="text-lg font-medium">{t('tapToUnlock')}</span>
+                <p className="text-xs mt-1 text-center px-4">{t('placePhoneNearReader')}</p>
+              </button>
               
-              {nfcWriteSuccess === false && nfcWriteErrorMessage && (
-                <p className="text-red-500 text-xs mt-4 text-center">{nfcWriteErrorMessage}</p>
+              {nfcErrorMessage && (
+                <p className="text-red-500 text-xs mt-4 text-center">{nfcErrorMessage}</p>
               )}
               
               {nfcSupported === false && (
                 <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-yellow-700 text-sm text-center">
-                    <span className="font-medium">Note:</span> NFC is not supported on this device or browser.
+                    <span className="font-medium">Note:</span> NFC is not supported on this device or browser. 
+                    Please use a mobile device with NFC capabilities.
                   </p>
                 </div>
               )}
