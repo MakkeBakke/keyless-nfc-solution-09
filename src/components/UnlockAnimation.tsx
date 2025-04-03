@@ -1,7 +1,7 @@
 
 import React, { useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import { LockKeyhole, KeyRound, ShieldCheck, Shield } from 'lucide-react';
+import { LockKeyhole, KeyRound, ShieldCheck, Shield, Nfc } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useTheme } from '@/contexts/ThemeContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -9,9 +9,10 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface UnlockAnimationProps {
   isLocked?: boolean;
   keyName?: string;
+  isNfcWrite?: boolean;
 }
 
-const UnlockAnimation = ({ isLocked = true, keyName = '' }: UnlockAnimationProps) => {
+const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false }: UnlockAnimationProps) => {
   const { theme } = useTheme();
   const { t } = useLanguage();
   
@@ -63,28 +64,36 @@ const UnlockAnimation = ({ isLocked = true, keyName = '' }: UnlockAnimationProps
           <div className="relative flex items-center justify-center mb-6">
             <div className={cn(
               "absolute w-24 h-24 rounded-full animate-pulse-ring",
-              isLocked 
-                ? "bg-red-500/20 dark:bg-red-500/10" 
-                : "bg-green-500/20 dark:bg-green-500/10"
+              isNfcWrite
+                ? "bg-axiv-blue/20 dark:bg-axiv-blue/10"
+                : isLocked 
+                  ? "bg-red-500/20 dark:bg-red-500/10" 
+                  : "bg-green-500/20 dark:bg-green-500/10"
             )}></div>
             <div className={cn(
               "absolute w-24 h-24 rounded-full animate-pulse-ring animation-delay-200",
-              isLocked 
-                ? "bg-red-500/30 dark:bg-red-500/20" 
-                : "bg-green-500/30 dark:bg-green-500/20"
+              isNfcWrite
+                ? "bg-axiv-blue/30 dark:bg-axiv-blue/20"
+                : isLocked 
+                  ? "bg-red-500/30 dark:bg-red-500/20" 
+                  : "bg-green-500/30 dark:bg-green-500/20"
             )}></div>
             <div className={cn(
               "absolute w-24 h-24 rounded-full animate-pulse-ring animation-delay-400",
-              isLocked 
-                ? "bg-red-500/40 dark:bg-red-500/30" 
-                : "bg-green-500/40 dark:bg-green-500/30"
+              isNfcWrite
+                ? "bg-axiv-blue/40 dark:bg-axiv-blue/30"
+                : isLocked 
+                  ? "bg-red-500/40 dark:bg-red-500/30" 
+                  : "bg-green-500/40 dark:bg-green-500/30"
             )}></div>
             
             {/* Place the icon inside the pulsing rings */}
             <motion.div 
               className={cn(
                 "relative z-10 w-28 h-28 rounded-full flex items-center justify-center text-white shadow-lg",
-                isLocked ? "bg-red-500" : "bg-green-500"
+                isNfcWrite
+                  ? "bg-axiv-blue"
+                  : isLocked ? "bg-red-500" : "bg-green-500"
               )}
               initial={{ rotate: 0 }}
               animate={{ 
@@ -97,10 +106,13 @@ const UnlockAnimation = ({ isLocked = true, keyName = '' }: UnlockAnimationProps
                 repeatDelay: 0.2 
               }}
             >
-              {isLocked ? 
-                <Shield size={40} className="drop-shadow-md" /> : 
+              {isNfcWrite ? (
+                <Nfc size={40} className="drop-shadow-md" />
+              ) : isLocked ? (
+                <Shield size={40} className="drop-shadow-md" />
+              ) : (
                 <ShieldCheck size={40} className="drop-shadow-md" />
-              }
+              )}
             </motion.div>
           </div>
           
@@ -116,9 +128,11 @@ const UnlockAnimation = ({ isLocked = true, keyName = '' }: UnlockAnimationProps
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              {isLocked ? 
-                (keyName ? `${t('locking')} ${keyName}...` : t('locking')) : 
-                (keyName ? `${t('unlocking')} ${keyName}...` : t('unlocking'))}
+              {isNfcWrite ? 
+                (keyName ? `${t('nfcWriting')} ${keyName}...` : t('nfcWriting')) :
+                isLocked ? 
+                  (keyName ? `${t('locking')} ${keyName}...` : t('locking')) : 
+                  (keyName ? `${t('unlocking')} ${keyName}...` : t('unlocking'))}
             </motion.p>
             <motion.p 
               className="text-axiv-gray dark:text-gray-300 text-sm"
@@ -126,7 +140,9 @@ const UnlockAnimation = ({ isLocked = true, keyName = '' }: UnlockAnimationProps
               animate={{ opacity: 1 }}
               transition={{ delay: 0.5 }}
             >
-              {isLocked ? t('securingDevice') : t('accessGranted')}
+              {isNfcWrite ? 
+                t('nfcWriteInstructions') :
+                isLocked ? t('securingDevice') : t('accessGranted')}
             </motion.p>
           </motion.div>
           
@@ -140,7 +156,7 @@ const UnlockAnimation = ({ isLocked = true, keyName = '' }: UnlockAnimationProps
             <motion.div 
               className={cn(
                 "h-full rounded-full",
-                isLocked ? "bg-axiv-blue" : "bg-green-500"
+                isNfcWrite ? "bg-axiv-blue" : (isLocked ? "bg-axiv-blue" : "bg-green-500")
               )}
               initial={{ width: 0 }}
               animate={{ width: "100%" }}

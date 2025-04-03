@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Nfc, CheckCircle, XCircle } from 'lucide-react';
@@ -19,6 +20,7 @@ const PairDevice = () => {
   const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
   const [nfcPermissionGranted, setNfcPermissionGranted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [nfcId, setNfcId] = useState<string | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -96,12 +98,21 @@ const PairDevice = () => {
           ndef.addEventListener("reading", (event: any) => {
             console.log("NFC tag detected!");
             console.log("Serial number:", event.serialNumber);
+            
+            // Store the NFC identifier for later use
+            setNfcId(event.serialNumber);
 
             // Successfully read an NFC tag
             nfcDetected = true;
             setScanning(false);
             setPairingSuccess(true);
             setStep(3);
+            
+            // Show a success toast
+            toast({
+              title: t('pairingSuccessful'),
+              description: "NFC device detected and paired successfully",
+            });
           });
 
           ndef.addEventListener("error", (error: any) => {
@@ -138,7 +149,7 @@ const PairDevice = () => {
         if (nfcTimeout) clearTimeout(nfcTimeout);
       };
     }
-  }, [step, scanning, nfcSupported]);
+  }, [step, scanning, nfcSupported, t]);
 
   const startScanning = async () => {
     setErrorMessage(null);
@@ -188,7 +199,8 @@ const PairDevice = () => {
           user_id: userId,
           battery_level: 100,
           is_active: true,
-          is_locked: true
+          is_locked: true,
+          nfc_id: nfcId // Store the NFC identifier
         })
         .select()
         .single();
@@ -203,7 +215,7 @@ const PairDevice = () => {
         .insert({
           key_id: data.id,
           user_id: userId,
-          action: 'create'
+          action: 'paired'
         });
 
       toast({

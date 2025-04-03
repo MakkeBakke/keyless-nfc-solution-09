@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
   Key, Lock, Unlock, Calendar, Battery, Share2, Settings, BellRing, 
-  AlertTriangle, Trash2, ChevronRight, ArrowLeft, Users
+  AlertTriangle, Trash2, ChevronRight, Nfc
 } from 'lucide-react';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
@@ -57,6 +57,15 @@ const KeyDetail = () => {
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState<KeyActivityRecord[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isPressing, setIsPressing] = useState(false);
+  const [pressDuration, setPressDuration] = useState(0);
+  const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
+  const [isWritingToNfc, setIsWritingToNfc] = useState(false);
+  const [nfcWriteSuccess, setNfcWriteSuccess] = useState<boolean | null>(null);
+  const [nfcWriteErrorMessage, setNfcWriteErrorMessage] = useState<string | null>(null);
+
+  const pressTimer = useRef<NodeJS.Timeout | null>(null);
+  const requiredPressTime = 2000; // 2 seconds press to unlock
   
   useEffect(() => {
     const fetchKeyData = async () => {
@@ -145,7 +154,23 @@ const KeyDetail = () => {
     };
     
     fetchKeyData();
+    checkNfcSupport();
   }, [id, t]);
+
+  const checkNfcSupport = async () => {
+    try {
+      if (!('NDEFReader' in window)) {
+        console.log('Web NFC API is not supported in this browser');
+        setNfcSupported(false);
+        return;
+      }
+
+      setNfcSupported(true);
+    } catch (error) {
+      console.error('Error checking NFC support:', error);
+      setNfcSupported(false);
+    }
+  };
   
   const handleToggleLock = async () => {
     if (!keyData) return;
@@ -214,6 +239,11 @@ const KeyDetail = () => {
           
           setActivities([newActivity, ...activities]);
         }
+
+        // If unlocking, prompt to write to NFC
+        if (isLocked && nfcSupported) {
+          writeToNfc(keyData.id, keyData.name);
+        }
       }, 2000);
     } catch (error) {
       console.error('Error toggling lock state:', error);
@@ -223,6 +253,78 @@ const KeyDetail = () => {
         description: t('failedToUpdateKeyState'),
         variant: "destructive",
       });
+    }
+  };
+
+  const startPress = () => {
+    if (!keyData || isPressing) return;
+    
+    setIsPressing(true);
+    setPressDuration(0);
+    
+    pressTimer.current = setInterval(() => {
+      setPressDuration(prev => {
+        const newDuration = prev + 100;
+        if (newDuration >= requiredPressTime) {
+          clearInterval(pressTimer.current as NodeJS.Timeout);
+          handleToggleLock();
+        }
+        return newDuration;
+      });
+    }, 100);
+  };
+  
+  const endPress = () => {
+    if (pressTimer.current) {
+      clearInterval(pressTimer.current);
+      pressTimer.current = null;
+    }
+    
+    setIsPressing(false);
+    setPressDuration(0);
+  };
+
+  const writeToNfc = async (keyId: string, keyName: string) => {
+    if (!nfcSupported) {
+      toast({
+        title: t('error'),
+        description: "NFC is not supported on this device",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsWritingToNfc(true);
+    setNfcWriteSuccess(null);
+    setNfcWriteErrorMessage(null);
+
+    try {
+      // @ts-ignore - NDEFReader might not be recognized by TypeScript
+      const ndef = new NDEFReader();
+      
+      await ndef.write({
+        records: [
+          { recordType: "text", data: `key:${keyId}:${keyName}` },
+          { recordType: "url", data: `https://axiv.app/key/${keyId}` }
+        ]
+      });
+      
+      setNfcWriteSuccess(true);
+      toast({
+        title: t('nfcWriteSuccess'),
+        description: t('nfcSuccessfullyWritten'),
+      });
+    } catch (error) {
+      console.error('Error writing to NFC tag:', error);
+      setNfcWriteSuccess(false);
+      setNfcWriteErrorMessage((error as Error).message);
+      toast({
+        title: t('nfcWriteError'),
+        description: t('nfcWriteFailed'),
+        variant: "destructive",
+      });
+    } finally {
+      setIsWritingToNfc(false);
     }
   };
   
@@ -330,27 +432,62 @@ const KeyDetail = () => {
                 </span>
               </div>
               
-              <button
-                onClick={handleToggleLock}
-                className={cn(
-                  "w-full py-3 rounded-lg flex items-center justify-center transition-all",
-                  isLocked 
-                    ? "bg-green-500 text-white hover:bg-green-600"
-                    : "bg-red-500 text-white hover:bg-red-600" 
-                )}
-              >
-                {isLocked ? (
-                  <>
-                    <Unlock className="w-5 h-5 mr-2" />
-                    {t('unlock')}
-                  </>
-                ) : (
-                  <>
-                    <Lock className="w-5 h-5 mr-2" />
-                    {t('lock')}
-                  </>
-                )}
-              </button>
+              {isWritingToNfc ? (
+                <div className="w-full py-3 bg-axiv-blue/80 text-white rounded-lg flex flex-col items-center justify-center">
+                  <div className="animate-spin rounded-full h-6 w-6 border-2 border-white border-t-transparent mb-2"></div>
+                  <span>{t('nfcWriting')}</span>
+                  <p className="text-xs mt-1">{t('presentPhoneToLock')}</p>
+                </div>
+              ) : (
+                <button
+                  onMouseDown={startPress}
+                  onMouseUp={endPress}
+                  onMouseLeave={endPress}
+                  onTouchStart={startPress}
+                  onTouchEnd={endPress}
+                  className={cn(
+                    "w-full py-3 rounded-lg flex items-center justify-center transition-all relative overflow-hidden",
+                    isLocked 
+                      ? "bg-green-500 text-white hover:bg-green-600"
+                      : "bg-red-500 text-white hover:bg-red-600" 
+                  )}
+                >
+                  {isPressing && (
+                    <div 
+                      className="absolute left-0 top-0 bottom-0 bg-white/20"
+                      style={{ width: `${(pressDuration / requiredPressTime) * 100}%` }}
+                    ></div>
+                  )}
+                  <div className="flex items-center justify-center relative z-10">
+                    {isLocked ? (
+                      <>
+                        <Unlock className="w-5 h-5 mr-2" />
+                        {isPressing ? t('holdToUnlock') : t('holdKeyToUnlock')}
+                      </>
+                    ) : (
+                      <>
+                        <Lock className="w-5 h-5 mr-2" />
+                        {isPressing ? t('releaseToCancel') : t('lock')}
+                      </>
+                    )}
+                  </div>
+                </button>
+              )}
+              
+              {nfcWriteSuccess === false && nfcWriteErrorMessage && (
+                <p className="text-red-500 text-xs mt-2 text-center">{nfcWriteErrorMessage}</p>
+              )}
+              
+              {!isLocked && nfcSupported && (
+                <button
+                  onClick={() => writeToNfc(keyData.id, keyData.name)}
+                  className="w-full mt-3 py-2 border border-axiv-blue text-axiv-blue rounded-lg flex items-center justify-center transition-colors hover:bg-axiv-blue/10"
+                  disabled={isWritingToNfc}
+                >
+                  <Nfc className="w-4 h-4 mr-2" />
+                  {t('nfcWriteInstructions')}
+                </button>
+              )}
             </div>
           </div>
           
@@ -412,7 +549,7 @@ const KeyDetail = () => {
           >
             <div className="flex items-center">
               <div className="w-10 h-10 rounded-full bg-axiv-blue/10 flex items-center justify-center mr-3">
-                <Users className="w-5 h-5 text-axiv-blue" />
+                <Share2 className="w-5 h-5 text-axiv-blue" />
               </div>
               <span>{t('permissions')}</span>
             </div>
