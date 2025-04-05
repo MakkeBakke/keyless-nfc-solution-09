@@ -8,17 +8,17 @@ import AddKeyModal from '@/components/AddKeyModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
+import { useNFC } from '@/hooks/useNFC';
 
 const PairDevice = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { isSupported, isScanning, error: nfcError, startScan } = useNFC();
+  
   const [step, setStep] = useState(1);
-  const [scanning, setScanning] = useState(false);
   const [pairingSuccess, setPairingSuccess] = useState<boolean | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
-  const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
-  const [nfcPermissionGranted, setNfcPermissionGranted] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [nfcDeviceId, setNfcDeviceId] = useState<string | null>(null);
 
@@ -33,68 +33,35 @@ const PairDevice = () => {
     };
 
     checkSession();
-    checkNfcSupport();
   }, []);
 
-  const checkNfcSupport = async () => {
-    try {
-      if (!('NDEFReader' in window)) {
-        console.log('Web NFC API is not supported in this browser');
-        setNfcSupported(false);
-        setErrorMessage('NFC is not supported on this device or browser.');
-        return;
-      }
-
-      setNfcSupported(true);
-    } catch (error) {
-      console.error('Error checking NFC support:', error);
-      setNfcSupported(false);
-      setErrorMessage('Error checking NFC support. Please try again.');
-    }
-  };
-
-  const requestNfcPermission = async () => {
-    if (!nfcSupported) return;
-
-    try {
-      // @ts-ignore - NDEFReader might not be recognized by TypeScript
-      const ndef = new NDEFReader();
-      await ndef.scan();
-      setNfcPermissionGranted(true);
-      return true;
-    } catch (error) {
-      console.error('Error requesting NFC permission:', error);
-      setNfcPermissionGranted(false);
-      if ((error as Error).name === 'NotAllowedError') {
-        setErrorMessage('NFC permission denied. Please enable NFC permissions and try again.');
-      } else if ((error as Error).name === 'NotSupportedError') {
-        setErrorMessage('NFC is not supported on this device.');
-      } else {
-        setErrorMessage('Error accessing NFC. Please make sure NFC is enabled on your device.');
-      }
-      return false;
-    }
-  };
-
   useEffect(() => {
-    if (step === 2 && scanning) {
-      let nfcTimeout: NodeJS.Timeout;
-      let nfcDetected = false;
-
-      const scanForNfc = async () => {
+    if (step === 2) {
+      // Set up the NFC reader
+      const setupNFC = async () => {
         try {
-          if (!nfcSupported) {
-            // Stop the process if NFC is not supported
-            setScanning(false);
+          if (!isSupported) {
+            console.log('Web NFC API is not supported in this browser');
             setPairingSuccess(false);
             setStep(3);
+            setErrorMessage('NFC is not supported on this device or browser.');
             return;
           }
 
-          // Real NFC scanning
+          // Start scanning
+          const scanStarted = await startScan();
+          
+          if (!scanStarted) {
+            setPairingSuccess(false);
+            setStep(3);
+            setErrorMessage(nfcError || 'Failed to start NFC scanning');
+            return;
+          }
+          
+          // Setup a listener for NFC tags
           // @ts-ignore - NDEFReader might not be recognized by TypeScript
           const ndef = new NDEFReader();
-
+          
           ndef.addEventListener("reading", (event: any) => {
             console.log("NFC tag detected!");
             console.log("Serial number:", event.serialNumber);
@@ -103,8 +70,6 @@ const PairDevice = () => {
             setNfcDeviceId(event.serialNumber);
 
             // Successfully read an NFC tag
-            nfcDetected = true;
-            setScanning(false);
             setPairingSuccess(true);
             setStep(3);
             
@@ -115,60 +80,36 @@ const PairDevice = () => {
             });
           });
 
-          ndef.addEventListener("error", (error: any) => {
-            console.error(`NFC Error: ${error.message}`);
-            if (!nfcDetected) {
-              setScanning(false);
+          // Setup a timeout to handle no NFC tags detected
+          const timeout = setTimeout(() => {
+            if (step === 2) {
               setPairingSuccess(false);
               setStep(3);
-            }
-          });
-
-          await ndef.scan();
-
-          // Set a timeout for the scanning process
-          nfcTimeout = setTimeout(() => {
-            if (!nfcDetected) {
-              setScanning(false);
-              setPairingSuccess(false);
-              setStep(3);
+              setErrorMessage('No NFC tag was detected. Please try again.');
             }
           }, 10000); // 10 seconds timeout
-
+          
+          return () => clearTimeout(timeout);
+          
         } catch (error) {
           console.error('Error scanning for NFC:', error);
-          setScanning(false);
           setPairingSuccess(false);
           setStep(3);
+          setErrorMessage((error as Error).message);
         }
       };
 
-      scanForNfc();
-
-      return () => {
-        if (nfcTimeout) clearTimeout(nfcTimeout);
-      };
+      setupNFC();
     }
-  }, [step, scanning, nfcSupported, t]);
+  }, [step, isSupported, nfcError, startScan, t]);
 
-  const startScanning = async () => {
+  const beginScanning = async () => {
     setErrorMessage(null);
-
-    // Request NFC permission if supported
-    if (nfcSupported && !nfcPermissionGranted) {
-      const permissionGranted = await requestNfcPermission();
-      if (!permissionGranted) {
-        // Don't proceed if permission was denied
-        return;
-      }
-    }
-
-    setScanning(true);
+    setStep(2);
   };
 
   const resetPairing = () => {
     setStep(1);
-    setScanning(false);
     setPairingSuccess(null);
     setErrorMessage(null);
   };
@@ -243,7 +184,7 @@ const PairDevice = () => {
         <div className="glass-card p-6 animate-fade-in">
           <div className="flex justify-center mb-6">
             <div className="relative">
-              {step === 2 && scanning && (
+              {step === 2 && (
                 <>
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="absolute w-16 h-16 rounded-full bg-axiv-blue/20 animate-pulse-ring"></div>
@@ -270,7 +211,7 @@ const PairDevice = () => {
                 ) : (
                   <Nfc className={cn(
                     "w-10 h-10 transition-all",
-                    scanning ? "text-axiv-blue animate-pulse" : "text-axiv-blue"
+                    step === 2 ? "text-axiv-blue animate-pulse" : "text-axiv-blue"
                   )} />
                 )}
               </div>
@@ -291,7 +232,7 @@ const PairDevice = () => {
               <p className="text-red-500 mt-2 text-sm">{errorMessage}</p>
             )}
 
-            {nfcSupported === false && step === 1 && (
+            {!isSupported && step === 1 && (
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
                 <p>NFC is not supported on this device or browser. Please use a compatible device.</p>
               </div>
@@ -319,10 +260,7 @@ const PairDevice = () => {
               </div>
 
               <button
-                onClick={() => {
-                  setStep(2);
-                  startScanning();
-                }}
+                onClick={beginScanning}
                 className="w-full py-3 bg-axiv-blue text-white rounded-xl hover:bg-axiv-blue/90 transition-colors"
               >
                 {t('startPairing')}

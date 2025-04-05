@@ -8,15 +8,6 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com?forceHideBadge=true',
     cleartext: true
-  },
-  plugins: {
-    HCEPlugin: {
-      nfcCardEmulation: {
-        aid: "F0010203040506",
-        category: "payment",
-        displayName: "Keyless NFC Solution"
-      }
-    }
   }
 };
 

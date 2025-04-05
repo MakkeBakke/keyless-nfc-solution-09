@@ -24,6 +24,7 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
+import { useNFC } from '@/hooks/useNFC';
 
 // Type definition to match the Supabase database structure
 interface KeyRecord {
@@ -52,15 +53,14 @@ const KeyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { isSupported, error: nfcError, emulateNFC } = useNFC();
   
   const [keyData, setKeyData] = useState<KeyRecord | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
   const [loading, setLoading] = useState(true);
   const [activities, setActivities] = useState<KeyActivityRecord[]>([]);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
-  const [nfcSupported, setNfcSupported] = useState<boolean | null>(null);
   const [isNfcEmulating, setIsNfcEmulating] = useState(false);
-  const [nfcEmulationSuccess, setNfcEmulationSuccess] = useState<boolean | null>(null);
   const [nfcErrorMessage, setNfcErrorMessage] = useState<string | null>(null);
   
   useEffect(() => {
@@ -149,27 +149,12 @@ const KeyDetail = () => {
     };
     
     fetchKeyData();
-    checkNfcSupport();
   }, [id, t]);
 
-  const checkNfcSupport = async () => {
-    try {
-      if (!('NDEFReader' in window)) {
-        console.log('Web NFC API is not supported in this browser');
-        setNfcSupported(false);
-        return;
-      }
-
-      setNfcSupported(true);
-    } catch (error) {
-      console.error('Error checking NFC support:', error);
-      setNfcSupported(false);
-    }
-  };
-
-  const emulateNfc = async () => {
+  const handleEmulateNfc = async () => {
     if (!keyData) return;
-    if (!nfcSupported) {
+    
+    if (!isSupported) {
       toast({
         title: t('error'),
         description: "NFC is not supported on this device. Please use a device with NFC capabilities.",
@@ -185,6 +170,13 @@ const KeyDetail = () => {
     try {
       // Check authentication
       const { data: { session } } = await supabase.auth.getSession();
+      
+      // Use our NFC hook to emulate NFC
+      const result = await emulateNFC(keyData.id);
+      
+      if (!result) {
+        throw new Error('NFC emulation failed');
+      }
       
       if (session) {
         // Update the key's last_used timestamp in the database
@@ -207,46 +199,34 @@ const KeyDetail = () => {
           });
       }
 
-      // This is where we'd normally try to emulate the NFC tag
-      // Since the Web NFC API doesn't support tag emulation directly,
-      // we'll simulate it for demonstration purposes
-      
-      // Simulate NFC emulation delay
-      setTimeout(() => {
-        // Update the local key data
-        if (keyData) {
-          setKeyData({
-            ...keyData,
-            last_used: new Date().toISOString()
-          });
-        }
-        
-        setShowAnimation(false);
-        setIsNfcEmulating(false);
-        
-        // Show success message
-        toast({
-          title: t('keyUnlocked'),
-          description: t('successfullyUnlocked'),
+      // Update the local key data
+      if (keyData) {
+        setKeyData({
+          ...keyData,
+          last_used: new Date().toISOString()
         });
+      }
+      
+      // Show success message
+      toast({
+        title: t('keyUnlocked'),
+        description: t('successfullyUnlocked'),
+      });
+      
+      // Add to local activity list
+      if (session) {
+        const newActivity = {
+          id: Date.now().toString(),
+          key_id: keyData.id,
+          user_id: session.user.id,
+          action: 'unlock',
+          performed_at: new Date().toISOString()
+        };
         
-        // Add to local activity list
-        if (session) {
-          const newActivity = {
-            id: Date.now().toString(),
-            key_id: keyData.id,
-            user_id: session.user.id,
-            action: 'unlock',
-            performed_at: new Date().toISOString()
-          };
-          
-          setActivities([newActivity, ...activities]);
-        }
-      }, 3000);
+        setActivities([newActivity, ...activities]);
+      }
     } catch (error) {
       console.error('Error emulating NFC:', error);
-      setShowAnimation(false);
-      setIsNfcEmulating(false);
       setNfcErrorMessage((error as Error).message);
       
       toast({
@@ -254,6 +234,12 @@ const KeyDetail = () => {
         description: t('failedToUpdateKeyState'),
         variant: "destructive",
       });
+    } finally {
+      // Hide animation after a short delay for better UX
+      setTimeout(() => {
+        setShowAnimation(false);
+        setIsNfcEmulating(false);
+      }, 1000);
     }
   };
   
@@ -336,7 +322,7 @@ const KeyDetail = () => {
           {showAnimation && 
             <UnlockAnimation 
               keyName={keyData.name} 
-              isNfcEmulation={isNfcEmulating} 
+              isNfcEmulating={isNfcEmulating} 
             />
           }
           
@@ -357,7 +343,7 @@ const KeyDetail = () => {
             
             <div className="mt-8 w-full max-w-xs flex flex-col items-center">
               <button
-                onClick={emulateNfc}
+                onClick={handleEmulateNfc}
                 disabled={isNfcEmulating}
                 className="w-40 h-40 rounded-full bg-axiv-blue text-white flex flex-col items-center justify-center hover:bg-axiv-blue/90 transition-colors shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
               >
@@ -370,7 +356,7 @@ const KeyDetail = () => {
                 <p className="text-red-500 text-xs mt-4 text-center">{nfcErrorMessage}</p>
               )}
               
-              {nfcSupported === false && (
+              {!isSupported && (
                 <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-yellow-700 text-sm text-center">
                     <span className="font-medium">Note:</span> NFC is not supported on this device or browser. 
