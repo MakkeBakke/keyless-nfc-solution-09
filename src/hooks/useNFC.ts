@@ -5,6 +5,7 @@ import { nfcService } from '@/services/NFCService';
 export interface NFCHookResult {
   isSupported: boolean;
   isScanning: boolean;
+  isEmulating: boolean;
   error: string | null;
   startScan: () => Promise<boolean>;
   writeTag: (data: string) => Promise<boolean>;
@@ -13,6 +14,7 @@ export interface NFCHookResult {
 
 export function useNFC(): NFCHookResult {
   const [isScanning, setIsScanning] = useState(false);
+  const [isEmulating, setIsEmulating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const isSupported = nfcService.isSupported();
@@ -60,17 +62,21 @@ export function useNFC(): NFCHookResult {
 
     try {
       setError(null);
+      setIsEmulating(true);
       const result = await nfcService.emulateNFC(keyId);
       return result;
     } catch (error) {
       setError((error as Error).message);
       return null;
+    } finally {
+      setIsEmulating(false);
     }
   };
 
   return {
     isSupported,
     isScanning,
+    isEmulating,
     error,
     startScan,
     writeTag,

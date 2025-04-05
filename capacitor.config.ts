@@ -8,6 +8,13 @@ const config: CapacitorConfig = {
   server: {
     url: 'https://ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com?forceHideBadge=true',
     cleartext: true
+  },
+  android: {
+    buildOptions: {
+      keystorePath: 'keyless-app.keystore',
+      keystoreAlias: 'keylessapp',
+      releaseType: 'AAB'
+    }
   }
 };
 
