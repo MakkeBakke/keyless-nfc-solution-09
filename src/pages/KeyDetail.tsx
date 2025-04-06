@@ -26,7 +26,6 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { Button } from '@/components/ui/button';
 import { useNFC } from '@/hooks/useNFC';
 
-// Type definition to match the Supabase database structure
 interface KeyRecord {
   id: string;
   name: string;
@@ -68,11 +67,9 @@ const KeyDetail = () => {
       try {
         if (!id) return;
         
-        // Check authentication
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          // Demo data for unauthenticated users
           const demoKey = {
             id: id,
             name: 'Demo Key',
@@ -96,21 +93,20 @@ const KeyDetail = () => {
               key_id: id,
               user_id: 'demo',
               action: 'unlock',
-              performed_at: new Date(Date.now() - 3600000).toISOString() // 1 hour ago
+              performed_at: new Date(Date.now() - 3600000).toISOString()
             },
             {
               id: '2',
               key_id: id,
               user_id: 'demo',
               action: 'lock',
-              performed_at: new Date(Date.now() - 7200000).toISOString() // 2 hours ago
+              performed_at: new Date(Date.now() - 7200000).toISOString()
             }
           ]);
           
           return;
         }
         
-        // Fetch key data from database
         const { data: keyData, error: keyError } = await supabase
           .from('keys')
           .select('*')
@@ -123,7 +119,6 @@ const KeyDetail = () => {
         
         setKeyData(keyData as KeyRecord);
         
-        // Fetch recent activity for this key
         const { data: activityData, error: activityError } = await supabase
           .from('key_activity')
           .select('*')
@@ -168,10 +163,8 @@ const KeyDetail = () => {
     setNfcErrorMessage(null);
     
     try {
-      // Check authentication
       const { data: { session } } = await supabase.auth.getSession();
       
-      // Use our NFC hook to emulate NFC
       const result = await emulateNFC(keyData.id);
       
       if (!result) {
@@ -179,7 +172,6 @@ const KeyDetail = () => {
       }
       
       if (session) {
-        // Update the key's last_used timestamp in the database
         const { error: updateError } = await supabase
           .from('keys')
           .update({ 
@@ -189,7 +181,6 @@ const KeyDetail = () => {
           
         if (updateError) throw updateError;
         
-        // Log key activity
         await supabase
           .from('key_activity')
           .insert({
@@ -199,7 +190,6 @@ const KeyDetail = () => {
           });
       }
 
-      // Update the local key data
       if (keyData) {
         setKeyData({
           ...keyData,
@@ -207,24 +197,20 @@ const KeyDetail = () => {
         });
       }
       
-      // Show success message
       toast({
         title: t('keyUnlocked'),
         description: t('successfullyUnlocked'),
       });
       
-      // Add to local activity list
-      if (session) {
-        const newActivity = {
-          id: Date.now().toString(),
-          key_id: keyData.id,
-          user_id: session.user.id,
-          action: 'unlock',
-          performed_at: new Date().toISOString()
-        };
-        
-        setActivities([newActivity, ...activities]);
-      }
+      const newActivity = {
+        id: Date.now().toString(),
+        key_id: keyData.id,
+        user_id: session.user.id,
+        action: 'unlock',
+        performed_at: new Date().toISOString()
+      };
+      
+      setActivities([newActivity, ...activities]);
     } catch (error) {
       console.error('Error emulating NFC:', error);
       setNfcErrorMessage((error as Error).message);
@@ -235,7 +221,6 @@ const KeyDetail = () => {
         variant: "destructive",
       });
     } finally {
-      // Hide animation after a short delay for better UX
       setTimeout(() => {
         setShowAnimation(false);
         setIsNfcEmulating(false);
@@ -247,11 +232,9 @@ const KeyDetail = () => {
     if (!keyData) return;
     
     try {
-      // Check authentication
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session) {
-        // Delete the key from the database
         const { error: deleteError } = await supabase
           .from('keys')
           .delete()
@@ -265,7 +248,6 @@ const KeyDetail = () => {
         description: t('keyRemoved').replace('{keyName}', keyData.name),
       });
       
-      // Navigate back to home screen
       navigate('/');
     } catch (error) {
       console.error('Error deleting key:', error);
@@ -322,7 +304,7 @@ const KeyDetail = () => {
           {showAnimation && 
             <UnlockAnimation 
               keyName={keyData.name} 
-              isNfcEmulating={isNfcEmulating} 
+              isNfcEmulation={isNfcEmulating}
             />
           }
           

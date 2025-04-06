@@ -9,7 +9,6 @@ import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-// Type definition to match the Supabase database structure
 interface KeyRecord {
   id: string;
   name: string;
@@ -32,7 +31,6 @@ const Index = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
 
-  // Check if it's the user's first visit
   useEffect(() => {
     const hasVisitedBefore = localStorage.getItem('axiv_visited');
     if (!hasVisitedBefore) {
@@ -42,12 +40,10 @@ const Index = () => {
   }, []);
 
   useEffect(() => {
-    // Check if user is authenticated
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
 
       if (!session) {
-        // User is not authenticated, show demo data
         setKeys([
           {
             id: '1',
@@ -74,7 +70,6 @@ const Index = () => {
 
       setUserId(session.user.id);
 
-      // Fetch user's keys from database
       try {
         const { data, error } = await supabase
           .from('keys')
@@ -86,7 +81,6 @@ const Index = () => {
           throw error;
         }
 
-        // Format keys for UI
         const formattedKeys = (data as KeyRecord[]).map((key) => ({
           id: key.id,
           name: key.name,
@@ -121,7 +115,6 @@ const Index = () => {
     setIsRefreshing(true);
 
     try {
-      // Refresh keys from database
       const { data, error } = await supabase
         .from('keys')
         .select('*')
@@ -132,7 +125,6 @@ const Index = () => {
         throw error;
       }
 
-      // Format keys for UI
       const formattedKeys = data.map((key) => ({
         id: key.id,
         name: key.name,
@@ -221,7 +213,6 @@ const Index = () => {
               <KeyCard
                 key={key.id}
                 keyData={key}
-                lockStatus={key.isLocked ? t('locked') : t('unlocked')} // Pass "locked" or "unlocked" as text
               />
             ))}
           </div>
