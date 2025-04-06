@@ -5,7 +5,6 @@ import { Home, Activity, Bell, UserCircle, Settings, ChevronLeft, ChevronRight }
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
-import { ScrollArea } from './ui/scroll-area';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -91,7 +90,7 @@ const Navigation = () => {
   
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-gray-200 z-40">
-      <div className="max-w-md relative mx-auto">
+      <div className="max-w-md relative mx-auto flex justify-center">
         {/* Left scroll button */}
         {canScrollLeft && (
           <motion.button 
@@ -118,41 +117,43 @@ const Navigation = () => {
           </motion.button>
         )}
         
-        {/* Navigation items container - using ScrollArea for smoother scrolling */}
+        {/* Navigation items container with explicit centering */}
         <div 
           ref={navContainerRef}
-          className="flex overflow-x-auto scrollbar-hide scroll-smooth"
+          className="flex overflow-x-auto scrollbar-hide scroll-smooth justify-center"
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none',
             WebkitOverflowScrolling: 'touch' // For smoother scrolling on iOS
           }}
         >
-          {navItems.map((item) => {
-            const isActive = location.pathname === item.path;
-            
-            return (
-              <button
-                key={item.path}
-                onClick={() => navigate(item.path)}
-                className={cn(
-                  "flex flex-col items-center py-3 px-4 relative flex-shrink-0",
-                  "transition-all duration-200",
-                  isActive ? "text-axiv-blue" : "text-axiv-gray hover:text-axiv-dark"
-                )}
-              >
-                <item.icon size={20} className={isActive ? "text-axiv-blue" : "text-current"} />
-                <span className="text-xs mt-1">{item.label}</span>
-                {isActive && (
-                  <motion.span 
-                    initial={{ opacity: 0, width: 0 }}
-                    animate={{ opacity: 1, width: '3rem' }}
-                    className="absolute -bottom-0 left-1/2 h-0.5 bg-axiv-blue -translate-x-1/2" 
-                  />
-                )}
-              </button>
-            );
-          })}
+          <div className="flex justify-center">
+            {navItems.map((item) => {
+              const isActive = location.pathname === item.path;
+              
+              return (
+                <button
+                  key={item.path}
+                  onClick={() => navigate(item.path)}
+                  className={cn(
+                    "flex flex-col items-center py-3 px-4 relative flex-shrink-0",
+                    "transition-all duration-200",
+                    isActive ? "text-axiv-blue" : "text-axiv-gray hover:text-axiv-dark"
+                  )}
+                >
+                  <item.icon size={20} className={isActive ? "text-axiv-blue" : "text-current"} />
+                  <span className="text-xs mt-1">{item.label}</span>
+                  {isActive && (
+                    <motion.span 
+                      initial={{ opacity: 0, width: 0 }}
+                      animate={{ opacity: 1, width: '3rem' }}
+                      className="absolute -bottom-0 left-1/2 h-0.5 bg-axiv-blue -translate-x-1/2" 
+                    />
+                  )}
+                </button>
+              );
+            })}
+          </div>
         </div>
       </div>
     </nav>
