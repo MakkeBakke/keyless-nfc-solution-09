@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Nfc, RefreshCw, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -155,7 +156,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen pb-24 pt-24 px-4">
-      <Header title={t('yourKeys')} />
+      <Header title="" />
 
       <section className="max-w-md mx-auto">
         {showGuide && (
