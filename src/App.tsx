@@ -18,8 +18,8 @@ import Settings from "./pages/Settings";
 import Profile from "./pages/Profile";
 import Notifications from "./pages/Notifications";
 import NotFound from "./pages/NotFound";
-import Header from "./components/Header";
 import Navigation from "./components/Navigation";
+import { useIsMobile } from "./hooks/use-mobile";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -33,11 +33,16 @@ const queryClient = new QueryClient({
 // Wrapper component to handle route animations, global header and navigation
 const AnimatedRoutes = () => {
   const location = useLocation();
+  const isMobile = useIsMobile();
+  const isHome = location.pathname === '/';
+  
+  // Only show padding bottom when not on home page or when logged in (which we can't determine here)
+  // The Index component will handle its own padding based on auth state
+  const paddingClass = !isHome ? "pb-16" : "";
   
   return (
     <>
-      <Header title="Digital Keys" />
-      <div className="pb-16"> {/* Add padding bottom to account for the navigation bar */}
+      <div className={paddingClass}>
         <AnimatePresence mode="wait">
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Index />} />

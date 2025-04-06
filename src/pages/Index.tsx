@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Nfc, RefreshCw, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -9,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface KeyRecord {
   id: string;
@@ -26,11 +26,13 @@ interface KeyRecord {
 const Index = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const isMobile = useIsMobile();
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [keys, setKeys] = useState<KeyData[]>([]);
   const [loading, setLoading] = useState(true);
   const [userId, setUserId] = useState<string | null>(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [hasSession, setHasSession] = useState(false);
 
   useEffect(() => {
     const hasVisitedBefore = localStorage.getItem('axiv_visited');
@@ -69,6 +71,7 @@ const Index = () => {
         return;
       }
 
+      setHasSession(true);
       setUserId(session.user.id);
 
       try {
@@ -154,9 +157,14 @@ const Index = () => {
     }
   };
 
+  const containerClass = cn(
+    "px-4",
+    hasSession ? "min-h-screen pb-24 pt-24" : "min-h-[calc(100vh-96px)] pb-16 pt-20"
+  );
+
   return (
-    <div className="min-h-screen pb-24 pt-24 px-4">
-      <Header title="" />
+    <div className={containerClass}>
+      {!hasSession && <Header title="" />}
 
       <section className="max-w-md mx-auto">
         {showGuide && (
@@ -187,7 +195,7 @@ const Index = () => {
         </div>
 
         {loading ? (
-          <div className="glass-card p-8 text-center">
+          <div className="glass-card p-6 text-center">
             <div className="animate-pulse flex flex-col items-center">
               <div className="w-12 h-12 bg-axiv-light-gray rounded-full mb-4"></div>
               <div className="h-4 bg-axiv-light-gray rounded w-3/4 mb-2"></div>
@@ -195,11 +203,11 @@ const Index = () => {
             </div>
           </div>
         ) : keys.length === 0 ? (
-          <div className="glass-card p-8 text-center">
+          <div className={cn("glass-card p-6 text-center", !hasSession && "mt-2")}>
             <div className="w-16 h-16 rounded-full bg-axiv-blue/10 flex items-center justify-center mx-auto mb-4">
               <Key className="w-8 h-8 text-axiv-blue" />
             </div>
-            <h3 className="text-lg font-medium mb-2">{t('noKeysAdded')}</h3>
+            <h3 className="text-lg font-medium mb-1">{t('noKeysAdded')}</h3>
             <p className="text-axiv-gray mb-4">{t('addFirstKey')}</p>
             <button
               onClick={() => navigate('/pair')}
@@ -209,7 +217,7 @@ const Index = () => {
             </button>
           </div>
         ) : (
-          <div className="mb-8">
+          <div className="mb-6">
             {keys.map((key) => (
               <KeyCard
                 key={key.id}
@@ -219,26 +227,31 @@ const Index = () => {
           </div>
         )}
 
-        <div className="bg-axiv-blue/5 rounded-2xl p-4 mb-4">
-          <h3 className="font-medium mb-2">{t('quickTips')}</h3>
-          <ul className="text-sm text-axiv-gray space-y-2">
-            <li className="flex items-start">
-              <span className="inline-block w-4 h-4 rounded-full bg-axiv-blue/20 text-axiv-blue text-xs flex items-center justify-center mr-2 mt-0.5">1</span>
-              {t('tipViewDetails')}
-            </li>
-            <li className="flex items-start">
-              <span className="inline-block w-4 h-4 rounded-full bg-axiv-blue/20 text-axiv-blue text-xs flex items-center justify-center mr-2 mt-0.5">2</span>
-              {t('tipLockUnlock')}
-            </li>
-            <li className="flex items-start">
-              <span className="inline-block w-4 h-4 rounded-full bg-axiv-blue/20 text-axiv-blue text-xs flex items-center justify-center mr-2 mt-0.5">3</span>
-              {t('tipPairDevice')}
-            </li>
-          </ul>
-        </div>
+        {!hasSession && (
+          <div className="bg-axiv-blue/5 rounded-2xl p-3 mb-4">
+            <h3 className="font-medium mb-2">{t('quickTips')}</h3>
+            <ul className="text-sm text-axiv-gray space-y-2">
+              <li className="flex items-start">
+                <span className="inline-block w-4 h-4 rounded-full bg-axiv-blue/20 text-axiv-blue text-xs flex items-center justify-center mr-2 mt-0.5">1</span>
+                {t('tipViewDetails')}
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-4 h-4 rounded-full bg-axiv-blue/20 text-axiv-blue text-xs flex items-center justify-center mr-2 mt-0.5">2</span>
+                {t('tipLockUnlock')}
+              </li>
+              <li className="flex items-start">
+                <span className="inline-block w-4 h-4 rounded-full bg-axiv-blue/20 text-axiv-blue text-xs flex items-center justify-center mr-2 mt-0.5">3</span>
+                {t('tipPairDevice')}
+              </li>
+            </ul>
+          </div>
+        )}
 
         <div
-          className="glass-card p-4 flex items-center justify-between cursor-pointer animate-fade-in"
+          className={cn(
+            "glass-card p-3 flex items-center justify-between cursor-pointer animate-fade-in",
+            !hasSession && "mb-2"
+          )}
           onClick={() => navigate('/pair')}
         >
           <div className="flex items-center">

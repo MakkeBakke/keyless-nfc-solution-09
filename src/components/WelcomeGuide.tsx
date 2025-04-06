@@ -25,27 +25,27 @@ const WelcomeGuide = ({ onClose }: { onClose: () => void }) => {
 
   return (
     <motion.div 
-      className="glass-card p-6 mb-8"
+      className="glass-card p-5 mb-4"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <div className="mb-6 text-center">
-        <h2 className="text-2xl font-medium mb-3">Welcome to Axiv</h2>
+      <div className="mb-4 text-center">
+        <h2 className="text-2xl font-medium mb-2">Welcome to Axiv</h2>
         <p className="text-axiv-gray text-sm">Your smart key management system</p>
       </div>
       
-      <div className="grid grid-cols-1 gap-5 mb-8">
+      <div className="grid grid-cols-1 gap-4 mb-5">
         {steps.map((step, index) => (
           <div key={index} className="flex items-center">
             <div className={cn(
-              "w-12 h-12 rounded-full flex items-center justify-center mr-4",
+              "w-10 h-10 rounded-full flex items-center justify-center mr-3",
               "bg-axiv-blue shadow-md"
             )}>
               {step.icon}
             </div>
             <div>
-              <h3 className="font-medium text-base mb-1">{step.title}</h3>
+              <h3 className="font-medium text-base mb-0.5">{step.title}</h3>
               <p className="text-sm text-axiv-gray">{step.description}</p>
             </div>
           </div>
@@ -54,7 +54,7 @@ const WelcomeGuide = ({ onClose }: { onClose: () => void }) => {
       
       <button 
         onClick={onClose}
-        className="w-full py-3 bg-axiv-blue text-white rounded-lg flex items-center justify-center hover:bg-axiv-blue/90 transition-colors shadow-sm"
+        className="w-full py-2.5 bg-axiv-blue text-white rounded-lg flex items-center justify-center hover:bg-axiv-blue/90 transition-colors shadow-sm"
       >
         Get Started <ArrowRight className="ml-2 w-4 h-4" />
       </button>
