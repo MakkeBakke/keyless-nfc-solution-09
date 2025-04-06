@@ -5,6 +5,7 @@ import { Home, Activity, Bell, UserCircle, Settings, ChevronLeft, ChevronRight }
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
+import { ScrollArea } from './ui/scroll-area';
 
 const Navigation = () => {
   const navigate = useNavigate();
@@ -117,11 +118,15 @@ const Navigation = () => {
           </motion.button>
         )}
         
-        {/* Navigation items container */}
+        {/* Navigation items container - using ScrollArea for smoother scrolling */}
         <div 
           ref={navContainerRef}
-          className="flex overflow-x-auto scrollbar-hide"
-          style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+          className="flex overflow-x-auto scrollbar-hide scroll-smooth"
+          style={{ 
+            scrollbarWidth: 'none', 
+            msOverflowStyle: 'none',
+            WebkitOverflowScrolling: 'touch' // For smoother scrolling on iOS
+          }}
         >
           {navItems.map((item) => {
             const isActive = location.pathname === item.path;
@@ -132,14 +137,18 @@ const Navigation = () => {
                 onClick={() => navigate(item.path)}
                 className={cn(
                   "flex flex-col items-center py-3 px-4 relative flex-shrink-0",
-                  "transition-colors",
+                  "transition-all duration-200",
                   isActive ? "text-axiv-blue" : "text-axiv-gray hover:text-axiv-dark"
                 )}
               >
                 <item.icon size={20} className={isActive ? "text-axiv-blue" : "text-current"} />
                 <span className="text-xs mt-1">{item.label}</span>
                 {isActive && (
-                  <span className="absolute -bottom-0 left-1/2 w-12 h-0.5 bg-axiv-blue -translate-x-1/2" />
+                  <motion.span 
+                    initial={{ opacity: 0, width: 0 }}
+                    animate={{ opacity: 1, width: '3rem' }}
+                    className="absolute -bottom-0 left-1/2 h-0.5 bg-axiv-blue -translate-x-1/2" 
+                  />
                 )}
               </button>
             );
