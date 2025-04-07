@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -324,14 +325,18 @@ const KeyDetail = () => {
             <p className="text-axiv-gray">{keyData.type}</p>
             
             <div className="mt-8 w-full max-w-xs flex flex-col items-center">
+              <div className="text-center mb-2">
+                <p className="text-sm text-axiv-gray">{t('placePhoneNearReader')}</p>
+              </div>
+              
               <button
                 onClick={handleEmulateNfc}
                 disabled={isNfcEmulating}
-                className="w-40 h-40 rounded-full bg-axiv-blue text-white flex flex-col items-center justify-center hover:bg-axiv-blue/90 transition-colors shadow-lg active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-40 h-40 rounded-full bg-gradient-to-br from-axiv-blue to-axiv-blue/80 text-white flex flex-col items-center justify-center shadow-lg hover:shadow-xl transition-all duration-300 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed relative overflow-hidden"
               >
-                <Nfc className="w-12 h-12 mb-2" />
+                <div className="absolute inset-0 bg-white/10 rounded-full scale-[0.97] opacity-0 hover:opacity-100 transition-opacity"></div>
+                <Nfc className="w-12 h-12 mb-3" />
                 <span className="text-lg font-medium">{t('tapToUnlock')}</span>
-                <p className="text-xs mt-1 text-center px-4">{t('placePhoneNearReader')}</p>
               </button>
               
               {nfcErrorMessage && (
@@ -527,3 +532,4 @@ const KeyDetail = () => {
 };
 
 export default KeyDetail;
+
