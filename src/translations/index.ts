@@ -1,4 +1,3 @@
-
 import { english } from './english';
 import swedish from './swedish';
 import chinese from './chinese';
@@ -232,7 +231,9 @@ export type TranslationKey =
   | "tapToUnlock"
   | "placePhoneNearReader"
   | "emulatingNFC"
-  | "holdPhoneToReader";
+  | "holdPhoneToReader"
+  | "nfcNotSupported"
+  | "useDeviceWithNFC";
 
 const translations = {
   english,

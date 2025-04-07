@@ -228,7 +228,7 @@ export default {
   vibrationDetectionDescription: '检测可能的篡改尝试',
   securitySettingsUpdated: '安全设置已更新',
   failedToSaveSecuritySettings: '保存安全设置失败',
-  failedToLoadSecuritySettings: '加载安全设置失败',
+  failedToLoadSecuritySettings: '加载安全设���失败',
   
   // Key Permissions
   keyPermissions: '钥匙权限',
@@ -263,5 +263,13 @@ export default {
   userWillReceiveEmail: '用户将收到包含说明的电子邮件',
   userAlreadyHasAccess: '该用户已有访问权限',
   failedToInviteUser: '邀请用户失败',
-  failedToLoadPermissions: '加载权限失败'
+  failedToLoadPermissions: '加载权限失败',
+  
+  // NFC-related messages
+  tapToUnlock: '点击解锁',
+  placePhoneNearReader: '将手机靠近读卡器',
+  emulatingNFC: '模拟NFC',
+  holdPhoneToReader: '将手机靠近读卡器',
+  nfcNotSupported: '不支持NFC',
+  useDeviceWithNFC: '请使用支持NFC功能的设备'
 };

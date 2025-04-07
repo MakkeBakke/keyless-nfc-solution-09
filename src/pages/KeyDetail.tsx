@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -346,8 +345,7 @@ const KeyDetail = () => {
               {!isSupported && (
                 <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
                   <p className="text-yellow-700 text-sm text-center">
-                    <span className="font-medium">Note:</span> NFC is not supported on this device or browser. 
-                    Please use a mobile device with NFC capabilities.
+                    <span className="font-medium">{t('nfcNotSupported')}:</span> {t('useDeviceWithNFC')}
                   </p>
                 </div>
               )}
@@ -532,4 +530,3 @@ const KeyDetail = () => {
 };
 
 export default KeyDetail;
-

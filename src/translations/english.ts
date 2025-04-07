@@ -1,4 +1,3 @@
-
 export const english = {
   // General
   save: 'Save',
@@ -264,5 +263,13 @@ export const english = {
   userWillReceiveEmail: 'User will receive an email with instructions',
   userAlreadyHasAccess: 'This user already has access',
   failedToInviteUser: 'Failed to invite user',
-  failedToLoadPermissions: 'Failed to load permissions'
+  failedToLoadPermissions: 'Failed to load permissions',
+  
+  // NFC-related messages
+  tapToUnlock: 'Tap to Unlock',
+  placePhoneNearReader: 'Place phone near reader',
+  emulatingNFC: 'Emulating NFC',
+  holdPhoneToReader: 'Hold phone to reader',
+  nfcNotSupported: 'NFC is not supported',
+  useDeviceWithNFC: 'Please use a device with NFC capabilities'
 };
