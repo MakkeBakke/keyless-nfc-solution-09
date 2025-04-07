@@ -13,6 +13,7 @@ import { useForm } from 'react-hook-form';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
 import { format } from 'date-fns'; // Import date-fns for formatting dates
+import { useTheme } from '@/contexts/ThemeContext';
 
 type ProfileFormValues = {
   name: string;
@@ -33,6 +34,7 @@ const Profile = () => {
   const [authLoading, setAuthLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [createdAt, setCreatedAt] = useState<string | null>(null); // State for account creation date
+  const { isDark } = useTheme();
   
   const form = useForm<ProfileFormValues>({
     defaultValues: {
@@ -328,7 +330,10 @@ const Profile = () => {
             </div>
           </>
         ) : (
-          <div className="glass-card p-6 animate-fade-in">
+          <div className={cn(
+            "glass-card p-6 animate-fade-in",
+            isDark && "bg-[#1A1F2C]/95 backdrop-blur-lg border-gray-700/30"
+          )}>
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="login">Login</TabsTrigger>
@@ -336,7 +341,10 @@ const Profile = () => {
               </TabsList>
               
               <TabsContent value="login">
-                <Card className="border-0 shadow-none">
+                <Card className={cn(
+                  "border-0 shadow-none",
+                  isDark && "bg-[#1A1F2C] border border-gray-700/30"
+                )}>
                   <Form {...loginForm}>
                     <form onSubmit={loginForm.handleSubmit(handleLogin)} className="space-y-4">
                       <FormField
@@ -344,13 +352,16 @@ const Profile = () => {
                         name="email"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-sm text-axiv-gray">Email</FormLabel>
+                            <FormLabel className={cn("text-sm", isDark ? "text-gray-300" : "text-axiv-gray")}>Email</FormLabel>
                             <FormControl>
                               <Input 
                                 type="email" 
                                 placeholder="your.email@example.com" 
                                 {...field} 
-                                className="w-full p-3 border border-gray-200 rounded-lg" 
+                                className={cn(
+                                  "w-full p-3 border rounded-lg",
+                                  isDark ? "bg-gray-800/80 border-gray-700 text-white" : "border-gray-200"
+                                )}
                               />
                             </FormControl>
                           </FormItem>
@@ -362,13 +373,16 @@ const Profile = () => {
                         name="password"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-sm text-axiv-gray">Password</FormLabel>
+                            <FormLabel className={cn("text-sm", isDark ? "text-gray-300" : "text-axiv-gray")}>Password</FormLabel>
                             <FormControl>
                               <Input 
                                 type="password" 
                                 placeholder="••••••••" 
                                 {...field} 
-                                className="w-full p-3 border border-gray-200 rounded-lg" 
+                                className={cn(
+                                  "w-full p-3 border rounded-lg",
+                                  isDark ? "bg-gray-800/80 border-gray-700 text-white" : "border-gray-200"
+                                )}
                               />
                             </FormControl>
                           </FormItem>
@@ -389,7 +403,10 @@ const Profile = () => {
               </TabsContent>
               
               <TabsContent value="register">
-                <Card className="border-0 shadow-none">
+                <Card className={cn(
+                  "border-0 shadow-none",
+                  isDark && "bg-[#1A1F2C] border border-gray-700/30"
+                )}>
                   <Form {...registerForm}>
                     <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
                       <FormField
@@ -397,12 +414,15 @@ const Profile = () => {
                         name="name"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-sm text-axiv-gray">Full Name</FormLabel>
+                            <FormLabel className={cn("text-sm", isDark ? "text-gray-300" : "text-axiv-gray")}>Full Name</FormLabel>
                             <FormControl>
                               <Input 
                                 placeholder="John Doe" 
                                 {...field} 
-                                className="w-full p-3 border border-gray-200 rounded-lg" 
+                                className={cn(
+                                  "w-full p-3 border rounded-lg",
+                                  isDark ? "bg-gray-800/80 border-gray-700 text-white" : "border-gray-200"
+                                )}
                               />
                             </FormControl>
                           </FormItem>
@@ -414,13 +434,16 @@ const Profile = () => {
                         name="email"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-sm text-axiv-gray">Email</FormLabel>
+                            <FormLabel className={cn("text-sm", isDark ? "text-gray-300" : "text-axiv-gray")}>Email</FormLabel>
                             <FormControl>
                               <Input 
                                 type="email" 
                                 placeholder="your.email@example.com" 
                                 {...field} 
-                                className="w-full p-3 border border-gray-200 rounded-lg" 
+                                className={cn(
+                                  "w-full p-3 border rounded-lg",
+                                  isDark ? "bg-gray-800/80 border-gray-700 text-white" : "border-gray-200"
+                                )}
                               />
                             </FormControl>
                           </FormItem>
@@ -432,13 +455,16 @@ const Profile = () => {
                         name="password"
                         render={({ field }) => (
                           <FormItem className="space-y-2">
-                            <FormLabel className="text-sm text-axiv-gray">Password</FormLabel>
+                            <FormLabel className={cn("text-sm", isDark ? "text-gray-300" : "text-axiv-gray")}>Password</FormLabel>
                             <FormControl>
                               <Input 
                                 type="password" 
                                 placeholder="••••••••" 
                                 {...field} 
-                                className="w-full p-3 border border-gray-200 rounded-lg" 
+                                className={cn(
+                                  "w-full p-3 border rounded-lg",
+                                  isDark ? "bg-gray-800/80 border-gray-700 text-white" : "border-gray-200"
+                                )}
                               />
                             </FormControl>
                           </FormItem>
