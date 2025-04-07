@@ -1,7 +1,7 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useRef, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { Home, Activity, Bell, UserCircle, Settings, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Home, Activity, Bell, UserCircle, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { motion } from 'framer-motion';
@@ -11,8 +11,6 @@ const Navigation = () => {
   const location = useLocation();
   const { t } = useLanguage();
   const navContainerRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
   
   const navItems = [
     {
@@ -42,81 +40,9 @@ const Navigation = () => {
     }
   ];
 
-  // Check if we can scroll left or right
-  const checkScrollability = () => {
-    if (!navContainerRef.current) return;
-    
-    const { scrollLeft, scrollWidth, clientWidth } = navContainerRef.current;
-    setCanScrollLeft(scrollLeft > 0);
-    setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 5); // 5px buffer
-  };
-
-  // Scroll the navbar in the specified direction
-  const scroll = (direction: 'left' | 'right') => {
-    if (!navContainerRef.current) return;
-    
-    const scrollAmount = 150;
-    const currentScroll = navContainerRef.current.scrollLeft;
-    const targetScroll = direction === 'left' 
-      ? currentScroll - scrollAmount 
-      : currentScroll + scrollAmount;
-    
-    navContainerRef.current.scrollTo({
-      left: targetScroll,
-      behavior: 'smooth'
-    });
-  };
-
-  // Check scrollability on mount and window resize
-  useEffect(() => {
-    checkScrollability();
-    
-    const handleResize = () => {
-      checkScrollability();
-    };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Check scrollability when scrolling the nav container
-  useEffect(() => {
-    const navContainer = navContainerRef.current;
-    if (navContainer) {
-      navContainer.addEventListener('scroll', checkScrollability);
-      return () => navContainer.removeEventListener('scroll', checkScrollability);
-    }
-  }, []);
-  
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-gray-200 z-40">
       <div className="max-w-md relative mx-auto flex justify-center">
-        {/* Left scroll button */}
-        {canScrollLeft && (
-          <motion.button 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onClick={() => scroll('left')}
-            className="absolute left-0 top-0 bottom-0 z-10 bg-gradient-to-r from-background/80 to-transparent px-2 flex items-center"
-            aria-label="Scroll left"
-          >
-            <ChevronLeft className="text-axiv-gray" size={20} />
-          </motion.button>
-        )}
-        
-        {/* Right scroll button */}
-        {canScrollRight && (
-          <motion.button 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            onClick={() => scroll('right')}
-            className="absolute right-0 top-0 bottom-0 z-10 bg-gradient-to-l from-background/80 to-transparent px-2 flex items-center"
-            aria-label="Scroll right"
-          >
-            <ChevronRight className="text-axiv-gray" size={20} />
-          </motion.button>
-        )}
-        
         {/* Navigation items container with explicit centering */}
         <div 
           ref={navContainerRef}
