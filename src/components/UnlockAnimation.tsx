@@ -17,7 +17,7 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false, is
   const { theme } = useTheme();
   const { t } = useLanguage();
   
-  // Use effect to prevent body scrolling when animation is shown
+  // Performance optimization: Prevent body scrolling when animation is shown
   useEffect(() => {
     // Disable scrolling on body
     document.body.style.overflow = 'hidden';
@@ -27,6 +27,45 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false, is
       document.body.style.overflow = '';
     };
   }, []);
+
+  // Animation variants for consistent, reusable animations
+  const backdropVariants = {
+    hidden: { opacity: 0 },
+    visible: { opacity: 1, transition: { duration: 0.3 } }
+  };
+  
+  const containerVariants = {
+    hidden: { scale: 0.9, y: 10, opacity: 0 },
+    visible: { 
+      scale: 1, 
+      y: 0, 
+      opacity: 1,
+      transition: { 
+        type: "spring", 
+        stiffness: 260, 
+        damping: 20,
+        delay: 0.1 
+      }
+    }
+  };
+  
+  const iconVariants = {
+    hidden: { rotate: 0, scale: 1 },
+    visible: { 
+      rotate: [0, 10, 0, -10, 0],
+      scale: [1, 1.05, 1, 1.05, 1],
+      transition: { 
+        duration: 1,
+        repeat: 1, 
+        repeatDelay: 0.2 
+      } 
+    }
+  };
+
+  const textVariants = {
+    hidden: { opacity: 0, y: 10 },
+    visible: { opacity: 1, y: 0, transition: { delay: 0.4, duration: 0.3 } }
+  };
 
   return (
     <AnimatePresence>
@@ -45,21 +84,16 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false, is
               ? "bg-gray-900/80" 
               : "bg-white/80"
           )}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.3 }}
+          variants={backdropVariants}
+          initial="hidden"
+          animate="visible"
         />
         
         <motion.div 
           className="flex flex-col items-center justify-center relative z-10"
-          initial={{ scale: 0.9, y: 10 }}
-          animate={{ scale: 1, y: 0 }}
-          transition={{ 
-            type: "spring", 
-            stiffness: 260, 
-            damping: 20,
-            delay: 0.1 
-          }}
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
         >
           {/* Create the pulsing rings animation */}
           <div className="relative flex items-center justify-center mb-6">
@@ -88,16 +122,9 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false, is
                 "relative z-10 w-28 h-28 rounded-full flex items-center justify-center text-white shadow-lg",
                 isNfcWrite || isNfcEmulation ? "bg-axiv-blue" : "bg-green-500"
               )}
-              initial={{ rotate: 0 }}
-              animate={{ 
-                rotate: [0, 10, 0, -10, 0],
-                scale: [1, 1.05, 1, 1.05, 1]
-              }}
-              transition={{ 
-                duration: 1, 
-                repeat: 1, 
-                repeatDelay: 0.2 
-              }}
+              variants={iconVariants}
+              initial="hidden"
+              animate="visible"
             >
               {isNfcWrite || isNfcEmulation ? (
                 <Nfc size={40} className="drop-shadow-md" />
@@ -109,15 +136,12 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false, is
           
           <motion.div 
             className="text-center"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3, duration: 0.3 }}
+            variants={textVariants}
+            initial="hidden"
+            animate="visible"
           >
             <motion.p 
               className="text-xl font-medium mb-2 dark:text-white"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.4 }}
             >
               {isNfcWrite ? 
                 (keyName ? `${t('nfcWriting')} ${keyName}...` : t('nfcWriting')) :
@@ -127,9 +151,6 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false, is
             </motion.p>
             <motion.p 
               className="text-axiv-gray dark:text-gray-300 text-sm"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5 }}
             >
               {isNfcWrite ? 
                 t('nfcWriteInstructions') :
@@ -139,7 +160,7 @@ const UnlockAnimation = ({ isLocked = true, keyName = '', isNfcWrite = false, is
             </motion.p>
           </motion.div>
           
-          {/* Progress indicator */}
+          {/* Progress indicator - optimize animation */}
           <motion.div
             className="mt-8 w-40 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full overflow-hidden"
             initial={{ opacity: 0, y: 10 }}

@@ -1,5 +1,5 @@
 
-import React, { useRef, useEffect } from 'react';
+import React, { useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Home, Activity, Bell, UserCircle, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -42,15 +42,14 @@ const Navigation = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-background/80 backdrop-blur-md border-t border-gray-200 z-40">
-      <div className="max-w-md relative mx-auto flex justify-center">
-        {/* Navigation items container with explicit centering */}
+      <div className="max-w-md mx-auto">
         <div 
           ref={navContainerRef}
-          className="flex overflow-x-auto scrollbar-hide scroll-smooth justify-center"
+          className="flex justify-center overflow-x-auto scrollbar-hide scroll-smooth"
           style={{ 
             scrollbarWidth: 'none', 
             msOverflowStyle: 'none',
-            WebkitOverflowScrolling: 'touch' // For smoother scrolling on iOS
+            WebkitOverflowScrolling: 'touch'
           }}
         >
           <div className="flex justify-center">

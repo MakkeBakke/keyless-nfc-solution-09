@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from 'react';
+
+import React, { useState, useEffect, useMemo } from 'react';
 import { Nfc, RefreshCw, Key } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Header from '@/components/Header';
@@ -112,9 +113,7 @@ const Index = () => {
   }, [t]);
 
   const handleRefresh = async () => {
-    if (!userId) {
-      return;
-    }
+    if (!userId) return;
 
     setIsRefreshing(true);
 
@@ -125,9 +124,7 @@ const Index = () => {
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
 
-      if (error) {
-        throw error;
-      }
+      if (error) throw error;
 
       const formattedKeys = data.map((key) => ({
         id: key.id,
@@ -140,11 +137,7 @@ const Index = () => {
       }));
 
       setKeys(formattedKeys);
-
-      toast({
-        title: "Synchronized",
-        description: "All keys are up to date",
-      });
+      toast({ title: "Synchronized", description: "All keys are up to date" });
     } catch (error) {
       console.error('Error refreshing keys:', error);
       toast({
@@ -157,10 +150,12 @@ const Index = () => {
     }
   };
 
-  const containerClass = cn(
-    "px-4",
-    hasSession ? "min-h-screen pb-24 pt-24" : "min-h-[calc(100vh-96px)] pb-16 pt-20"
-  );
+  // Memoize the container class to prevent unnecessary re-renders
+  const containerClass = useMemo(() => 
+    cn(
+      "px-4",
+      hasSession ? "min-h-[calc(100vh-96px)] pb-20 pt-24" : "min-h-[calc(100vh-96px)] pb-16 pt-20"
+    ), [hasSession]);
 
   return (
     <div className={containerClass}>
@@ -177,21 +172,19 @@ const Index = () => {
             <p className="text-axiv-gray text-sm">{t('manageKeys')}</p>
           </div>
 
-          <div className="flex space-x-2">
-            <button
-              onClick={handleRefresh}
-              className={cn(
-                "w-10 h-10 rounded-full bg-axiv-light-gray text-axiv-gray flex items-center justify-center",
-                "hover:bg-gray-200 active:scale-[0.97] transition-all",
-                "tooltip-container"
-              )}
-              aria-label={t('refreshKeys')}
-              disabled={isRefreshing}
-            >
-              <RefreshCw size={20} className={isRefreshing ? "animate-spin" : ""} />
-              <span className="tooltip">{t('refreshKeys')}</span>
-            </button>
-          </div>
+          <button
+            onClick={handleRefresh}
+            className={cn(
+              "w-10 h-10 rounded-full bg-axiv-light-gray text-axiv-gray flex items-center justify-center",
+              "hover:bg-gray-200 active:scale-[0.97] transition-all",
+              "tooltip-container"
+            )}
+            aria-label={t('refreshKeys')}
+            disabled={isRefreshing}
+          >
+            <RefreshCw size={20} className={isRefreshing ? "animate-spin" : ""} />
+            <span className="tooltip">{t('refreshKeys')}</span>
+          </button>
         </div>
 
         {loading ? (
@@ -249,7 +242,7 @@ const Index = () => {
 
         <div
           className={cn(
-            "glass-card p-3 flex items-center justify-between cursor-pointer animate-fade-in",
+            "glass-card p-3 flex items-center justify-between cursor-pointer active:scale-[0.99] transition-transform",
             !hasSession && "mb-2"
           )}
           onClick={() => navigate('/pair')}

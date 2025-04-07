@@ -21,11 +21,14 @@ import NotFound from "./pages/NotFound";
 import Navigation from "./components/Navigation";
 import { useIsMobile } from "./hooks/use-mobile";
 
+// Configure React Query with optimized settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       refetchOnWindowFocus: false,
       retry: 1,
+      staleTime: 60000, // 1 minute stale time to reduce unnecessary refetches
+      cacheTime: 300000, // 5 minutes cache time
     },
   },
 });
@@ -33,17 +36,15 @@ const queryClient = new QueryClient({
 // Wrapper component to handle route animations, global header and navigation
 const AnimatedRoutes = () => {
   const location = useLocation();
-  const isMobile = useIsMobile();
   const isHome = location.pathname === '/';
   
-  // Only show padding bottom when not on home page or when logged in (which we can't determine here)
-  // The Index component will handle its own padding based on auth state
+  // Only show padding bottom when not on home page or when logged in
   const paddingClass = !isHome ? "pb-16" : "";
   
   return (
     <>
       <div className={paddingClass}>
-        <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait" initial={false}>
           <Routes location={location} key={location.pathname}>
             <Route path="/" element={<Index />} />
             <Route path="/key/:id" element={<KeyDetail />} />
@@ -70,7 +71,7 @@ const App = () => (
       <LanguageProvider>
         <TooltipProvider>
           <Toaster />
-          <Sonner position="top-center" />
+          <Sonner position="top-center" closeButton />
           <BrowserRouter>
             <AnimatedRoutes />
           </BrowserRouter>
