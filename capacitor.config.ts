@@ -6,8 +6,10 @@ const config: CapacitorConfig = {
   appName: 'keyless-nfc-solution',
   webDir: 'dist',
   server: {
-    url: 'https://ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com?forceHideBadge=true',
-    cleartext: true
+    androidScheme: 'https',
+    cleartext: true,
+    hostname: 'ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com',
+    url: 'https://ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com?forceHideBadge=true'
   },
   android: {
     buildOptions: {
