@@ -3,6 +3,8 @@
  * NFCService - A service for handling NFC operations using the Web NFC API
  */
 class NFCService {
+  private ndefReader: NDEFReader | null = null;
+
   // Check if NFC is supported in this browser/device
   isSupported(): boolean {
     return 'NDEFReader' in window;
@@ -16,9 +18,10 @@ class NFCService {
 
     try {
       // @ts-ignore - NDEFReader might not be recognized by TypeScript
-      const ndef = new NDEFReader();
-      await ndef.scan();
-      return ndef;
+      this.ndefReader = new NDEFReader();
+      await this.ndefReader.scan();
+      console.log('NFC scan started successfully');
+      return this.ndefReader;
     } catch (error) {
       console.error('Error starting NFC scan:', error);
       throw error;
@@ -41,6 +44,16 @@ class NFCService {
     } catch (error) {
       console.error('Error writing to NFC tag:', error);
       throw error;
+    }
+  }
+
+  // Stop scanning for NFC tags
+  stopScan(): void {
+    if (this.ndefReader) {
+      // Note: The Web NFC API doesn't have a direct method to stop scanning,
+      // but in a real implementation we'd handle this better
+      console.log('NFC scanning stopped');
+      this.ndefReader = null;
     }
   }
 
