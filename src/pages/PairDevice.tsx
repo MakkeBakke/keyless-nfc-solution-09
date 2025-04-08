@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Nfc, CheckCircle, XCircle } from 'lucide-react';
 import Header from '@/components/Header';
@@ -13,7 +13,7 @@ import { useNFC } from '@/hooks/useNFC';
 const PairDevice = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { isSupported, isScanning, error: nfcError, startScan } = useNFC();
+  const { isSupported, isScanning, error: nfcError, startScan, stopScan } = useNFC();
   
   const [step, setStep] = useState(1);
   const [pairingSuccess, setPairingSuccess] = useState<boolean | null>(null);
@@ -35,6 +35,28 @@ const PairDevice = () => {
     checkSession();
   }, []);
 
+  // Handle NFC reading events
+  const handleNfcReading = useCallback((event: any) => {
+    console.log("NFC tag detected!");
+    console.log("Serial number:", event.serialNumber);
+    
+    // Store the NFC identifier for later use
+    setNfcDeviceId(event.serialNumber);
+
+    // Successfully read an NFC tag
+    setPairingSuccess(true);
+    setStep(3);
+    
+    // Show a success toast
+    toast({
+      title: t('pairingSuccessful'),
+      description: "NFC device detected and paired successfully",
+    });
+    
+    // Stop scanning as we've successfully read a tag
+    stopScan();
+  }, [stopScan, t]);
+
   useEffect(() => {
     if (step === 2) {
       // Set up the NFC reader
@@ -48,8 +70,8 @@ const PairDevice = () => {
             return;
           }
 
-          // Start scanning
-          const scanStarted = await startScan();
+          // Start scanning with our reading handler
+          const scanStarted = await startScan(handleNfcReading);
           
           if (!scanStarted) {
             setPairingSuccess(false);
@@ -58,38 +80,20 @@ const PairDevice = () => {
             return;
           }
           
-          // Setup a listener for NFC tags
-          // @ts-ignore - NDEFReader might not be recognized by TypeScript
-          const ndef = new NDEFReader();
-          
-          ndef.addEventListener("reading", (event: any) => {
-            console.log("NFC tag detected!");
-            console.log("Serial number:", event.serialNumber);
-            
-            // Store the NFC identifier for later use
-            setNfcDeviceId(event.serialNumber);
-
-            // Successfully read an NFC tag
-            setPairingSuccess(true);
-            setStep(3);
-            
-            // Show a success toast
-            toast({
-              title: t('pairingSuccessful'),
-              description: "NFC device detected and paired successfully",
-            });
-          });
-
           // Setup a timeout to handle no NFC tags detected
           const timeout = setTimeout(() => {
             if (step === 2) {
+              stopScan();
               setPairingSuccess(false);
               setStep(3);
               setErrorMessage('No NFC tag was detected. Please try again.');
             }
           }, 10000); // 10 seconds timeout
           
-          return () => clearTimeout(timeout);
+          return () => {
+            clearTimeout(timeout);
+            stopScan();
+          };
           
         } catch (error) {
           console.error('Error scanning for NFC:', error);
@@ -101,7 +105,13 @@ const PairDevice = () => {
 
       setupNFC();
     }
-  }, [step, isSupported, nfcError, startScan, t]);
+    
+    return () => {
+      if (isScanning) {
+        stopScan();
+      }
+    };
+  }, [step, isSupported, isScanning, nfcError, startScan, stopScan, handleNfcReading]);
 
   const beginScanning = async () => {
     setErrorMessage(null);

@@ -4,6 +4,7 @@
  */
 class NFCService {
   private ndefReader: NDEFReader | null = null;
+  private readingListeners: Array<(event: any) => void> = [];
 
   // Check if NFC is supported in this browser/device
   isSupported(): boolean {
@@ -11,7 +12,7 @@ class NFCService {
   }
 
   // Request permission and start scanning for NFC tags
-  async startScan(): Promise<NDEFReader> {
+  async startScan(onReading?: (event: any) => void): Promise<NDEFReader> {
     if (!this.isSupported()) {
       throw new Error('NFC is not supported on this device or browser');
     }
@@ -21,6 +22,12 @@ class NFCService {
       this.ndefReader = new NDEFReader();
       await this.ndefReader.scan();
       console.log('NFC scan started successfully');
+      
+      if (onReading) {
+        this.readingListeners.push(onReading);
+        this.ndefReader.addEventListener("reading", onReading);
+      }
+      
       return this.ndefReader;
     } catch (error) {
       console.error('Error starting NFC scan:', error);
@@ -50,8 +57,11 @@ class NFCService {
   // Stop scanning for NFC tags
   stopScan(): void {
     if (this.ndefReader) {
-      // Note: The Web NFC API doesn't have a direct method to stop scanning,
-      // but in a real implementation we'd handle this better
+      // Clean up event listeners
+      this.readingListeners.forEach(listener => {
+        this.ndefReader?.removeEventListener("reading", listener);
+      });
+      this.readingListeners = [];
       console.log('NFC scanning stopped');
       this.ndefReader = null;
     }

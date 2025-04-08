@@ -17,7 +17,6 @@ const config: CapacitorConfig = {
       keystoreAlias: 'keylessapp',
       releaseType: 'AAB'
     },
-    // Add permissions for NFC
     androidXEnabled: true
   },
   plugins: {
