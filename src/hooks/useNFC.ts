@@ -1,5 +1,5 @@
 
-import { useState, useEffect, useCallback, useRef } from 'react';
+import { useState } from 'react';
 import { nfcService } from '@/services/NFCService';
 
 export interface NFCHookResult {
@@ -7,61 +7,36 @@ export interface NFCHookResult {
   isScanning: boolean;
   isEmulating: boolean;
   error: string | null;
-  startScan: (onReading?: (event: any) => void) => Promise<boolean>;
-  stopScan: () => void;
+  startScan: () => Promise<boolean>;
   writeTag: (data: string) => Promise<boolean>;
   emulateNFC: (keyId: string) => Promise<string | null>;
-  simulateTagDetection: (serialNumber?: string) => void;
 }
 
 export function useNFC(): NFCHookResult {
   const [isScanning, setIsScanning] = useState(false);
   const [isEmulating, setIsEmulating] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const onReadingRef = useRef<((event: any) => void) | null>(null);
-  
-  const isSupported = nfcService.isSupported();
-  
-  useEffect(() => {
-    return () => {
-      if (isScanning) {
-        nfcService.stopScan();
-      }
-    };
-  }, [isScanning]);
 
-  const startScan = async (onReading?: (event: any) => void): Promise<boolean> => {
+  const isSupported = nfcService.isSupported();
+
+  const startScan = async (): Promise<boolean> => {
     if (!isSupported) {
-      const errorMessage = 'NFC is not supported on this device or browser';
-      console.error(errorMessage);
-      setError(errorMessage);
+      setError('NFC is not supported on this device or browser');
       return false;
     }
 
     try {
       setIsScanning(true);
       setError(null);
-      onReadingRef.current = onReading || null;
-      console.log('Starting NFC scan from hook');
-      const ndef = await nfcService.startScan(onReading);
-      console.log('NFC scan started successfully from hook');
+      const ndef = await nfcService.startScan();
       return true;
     } catch (error) {
-      const errorMessage = (error as Error).message;
-      console.error('Error in useNFC.startScan:', errorMessage);
-      setError(errorMessage);
-      setIsScanning(false);
+      setError((error as Error).message);
       return false;
+    } finally {
+      setIsScanning(false);
     }
-    // Note: We don't set isScanning to false here because we want
-    // to keep scanning until stopScan is called or component unmounts
   };
-  
-  const stopScan = useCallback(() => {
-    console.log('Stopping NFC scan from hook');
-    nfcService.stopScan();
-    setIsScanning(false);
-  }, []);
 
   const writeTag = async (data: string): Promise<boolean> => {
     if (!isSupported) {
@@ -97,11 +72,6 @@ export function useNFC(): NFCHookResult {
       setIsEmulating(false);
     }
   };
-  
-  const simulateTagDetection = useCallback((serialNumber?: string) => {
-    console.log('Simulating tag detection from hook');
-    nfcService.simulateTagDetection(serialNumber);
-  }, []);
 
   return {
     isSupported,
@@ -109,9 +79,7 @@ export function useNFC(): NFCHookResult {
     isEmulating,
     error,
     startScan,
-    stopScan,
     writeTag,
-    emulateNFC,
-    simulateTagDetection
+    emulateNFC
   };
 }

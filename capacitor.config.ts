@@ -6,25 +6,14 @@ const config: CapacitorConfig = {
   appName: 'keyless-nfc-solution',
   webDir: 'dist',
   server: {
-    androidScheme: 'https',
-    cleartext: true,
-    hostname: 'ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com',
-    url: 'https://ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com?forceHideBadge=true'
+    url: 'https://ddbfed94-a16b-46a1-b25c-a1d90fac969a.lovableproject.com?forceHideBadge=true',
+    cleartext: true
   },
   android: {
     buildOptions: {
       keystorePath: 'keyless-app.keystore',
       keystoreAlias: 'keylessapp',
       releaseType: 'AAB'
-    },
-    androidXEnabled: true
-  },
-  plugins: {
-    Permissions: {
-      nfc: true
-    },
-    NFC: {
-      enabled: true
     }
   }
 };
