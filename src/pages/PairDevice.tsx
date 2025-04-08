@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Nfc, CheckCircle, XCircle } from 'lucide-react';
+import { Nfc, CheckCircle, XCircle, Smartphone } from 'lucide-react';
 import Header from '@/components/Header';
 import { cn } from '@/lib/utils';
 import AddKeyModal from '@/components/AddKeyModal';
@@ -9,11 +9,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
 import { useNFC } from '@/hooks/useNFC';
+import { Button } from '@/components/ui/button';
 
 const PairDevice = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { isSupported, isScanning, error: nfcError, startScan, stopScan } = useNFC();
+  const { isSupported, isScanning, error: nfcError, startScan, stopScan, simulateTagDetection } = useNFC();
   
   const [step, setStep] = useState(1);
   const [pairingSuccess, setPairingSuccess] = useState<boolean | null>(null);
@@ -21,6 +22,7 @@ const PairDevice = () => {
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [nfcDeviceId, setNfcDeviceId] = useState<string | null>(null);
+  const [scanTimeout, setScanTimeout] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -37,7 +39,7 @@ const PairDevice = () => {
 
   // Handle NFC reading events
   const handleNfcReading = useCallback((event: any) => {
-    console.log("NFC tag detected!");
+    console.log("NFC tag detected in PairDevice!", event);
     console.log("Serial number:", event.serialNumber);
     
     // Store the NFC identifier for later use
@@ -55,7 +57,13 @@ const PairDevice = () => {
     
     // Stop scanning as we've successfully read a tag
     stopScan();
-  }, [stopScan, t]);
+    
+    // Clear any existing timeout
+    if (scanTimeout) {
+      clearTimeout(scanTimeout);
+      setScanTimeout(null);
+    }
+  }, [stopScan, t, scanTimeout]);
 
   useEffect(() => {
     if (step === 2) {
@@ -71,24 +79,31 @@ const PairDevice = () => {
           }
 
           // Start scanning with our reading handler
+          console.log('Starting NFC scan in PairDevice component');
           const scanStarted = await startScan(handleNfcReading);
           
           if (!scanStarted) {
+            console.error('Failed to start NFC scanning');
             setPairingSuccess(false);
             setStep(3);
             setErrorMessage(nfcError || 'Failed to start NFC scanning');
             return;
           }
           
+          console.log('NFC scan started successfully in PairDevice component');
+          
           // Setup a timeout to handle no NFC tags detected
           const timeout = setTimeout(() => {
             if (step === 2) {
+              console.log('NFC scan timeout - no tag detected');
               stopScan();
               setPairingSuccess(false);
               setStep(3);
               setErrorMessage('No NFC tag was detected. Please try again.');
             }
-          }, 10000); // 10 seconds timeout
+          }, 30000); // 30 seconds timeout (increased from 10s)
+          
+          setScanTimeout(timeout);
           
           return () => {
             clearTimeout(timeout);
@@ -110,8 +125,12 @@ const PairDevice = () => {
       if (isScanning) {
         stopScan();
       }
+      
+      if (scanTimeout) {
+        clearTimeout(scanTimeout);
+      }
     };
-  }, [step, isSupported, isScanning, nfcError, startScan, stopScan, handleNfcReading]);
+  }, [step, isSupported, isScanning, nfcError, startScan, stopScan, handleNfcReading, scanTimeout]);
 
   const beginScanning = async () => {
     setErrorMessage(null);
@@ -132,6 +151,11 @@ const PairDevice = () => {
       navigate('/');
     }
   };
+  
+  // For testing in browsers or devices without NFC, simulate tag detection
+  const handleSimulatePairing = () => {
+    simulateTagDetection(`simulated-${Date.now()}`);
+  };
 
   const handleAddKey = async (keyName: string) => {
     if (!userId) {
@@ -151,7 +175,7 @@ const PairDevice = () => {
           battery_level: 100,
           is_active: true,
           is_locked: true,
-          nfc_device_id: nfcDeviceId // Store the NFC device ID
+          nfc_device_id: nfcDeviceId || `simulated-${Date.now()}` // Store the NFC device ID or generate a simulated one
         })
         .select()
         .single();
@@ -244,7 +268,7 @@ const PairDevice = () => {
 
             {!isSupported && step === 1 && (
               <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg text-sm text-yellow-800">
-                <p>NFC is not supported on this device or browser. Please use a compatible device.</p>
+                <p>NFC is not supported on this device or browser. Please use a compatible device or use the simulation option below for testing.</p>
               </div>
             )}
           </div>
@@ -275,6 +299,20 @@ const PairDevice = () => {
               >
                 {t('startPairing')}
               </button>
+              
+              <div className="pt-2 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  className="w-full flex items-center justify-center gap-2"
+                  onClick={handleSimulatePairing}
+                >
+                  <Smartphone className="w-4 h-4" />
+                  <span>Simulate NFC Tag (Testing)</span>
+                </Button>
+                <p className="text-xs text-gray-500 text-center mt-2">
+                  For testing purposes when physical NFC tag is not available
+                </p>
+              </div>
             </div>
           )}
 
@@ -282,6 +320,23 @@ const PairDevice = () => {
             <div className="text-center">
               <div className="inline-block animate-spin rounded-full h-8 w-8 border-2 border-axiv-blue border-t-transparent mb-4"></div>
               <p className="text-sm text-axiv-gray">{t('mayTakeAFewMoments')}</p>
+              <Button 
+                variant="ghost" 
+                className="mt-4" 
+                onClick={handleSimulatePairing}
+              >
+                Simulate Tag (for testing)
+              </Button>
+              <Button
+                variant="outline"
+                className="mt-2 w-full"
+                onClick={() => {
+                  stopScan();
+                  resetPairing();
+                }}
+              >
+                Cancel
+              </Button>
             </div>
           )}
 

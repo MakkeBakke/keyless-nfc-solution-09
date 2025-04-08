@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { nfcService } from '@/services/NFCService';
 
@@ -10,6 +11,7 @@ export interface NFCHookResult {
   stopScan: () => void;
   writeTag: (data: string) => Promise<boolean>;
   emulateNFC: (keyId: string) => Promise<string | null>;
+  simulateTagDetection: (serialNumber?: string) => void;
 }
 
 export function useNFC(): NFCHookResult {
@@ -30,7 +32,9 @@ export function useNFC(): NFCHookResult {
 
   const startScan = async (onReading?: (event: any) => void): Promise<boolean> => {
     if (!isSupported) {
-      setError('NFC is not supported on this device or browser');
+      const errorMessage = 'NFC is not supported on this device or browser';
+      console.error(errorMessage);
+      setError(errorMessage);
       return false;
     }
 
@@ -38,10 +42,15 @@ export function useNFC(): NFCHookResult {
       setIsScanning(true);
       setError(null);
       onReadingRef.current = onReading || null;
+      console.log('Starting NFC scan from hook');
       const ndef = await nfcService.startScan(onReading);
+      console.log('NFC scan started successfully from hook');
       return true;
     } catch (error) {
-      setError((error as Error).message);
+      const errorMessage = (error as Error).message;
+      console.error('Error in useNFC.startScan:', errorMessage);
+      setError(errorMessage);
+      setIsScanning(false);
       return false;
     }
     // Note: We don't set isScanning to false here because we want
@@ -49,6 +58,7 @@ export function useNFC(): NFCHookResult {
   };
   
   const stopScan = useCallback(() => {
+    console.log('Stopping NFC scan from hook');
     nfcService.stopScan();
     setIsScanning(false);
   }, []);
@@ -87,6 +97,11 @@ export function useNFC(): NFCHookResult {
       setIsEmulating(false);
     }
   };
+  
+  const simulateTagDetection = useCallback((serialNumber?: string) => {
+    console.log('Simulating tag detection from hook');
+    nfcService.simulateTagDetection(serialNumber);
+  }, []);
 
   return {
     isSupported,
@@ -96,6 +111,7 @@ export function useNFC(): NFCHookResult {
     startScan,
     stopScan,
     writeTag,
-    emulateNFC
+    emulateNFC,
+    simulateTagDetection
   };
 }

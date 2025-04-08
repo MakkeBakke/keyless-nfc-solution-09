@@ -22,6 +22,9 @@ const config: CapacitorConfig = {
   plugins: {
     Permissions: {
       nfc: true
+    },
+    NFC: {
+      enabled: true
     }
   }
 };
