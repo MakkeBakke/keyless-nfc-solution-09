@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Nfc, CheckCircle, XCircle } from 'lucide-react';
@@ -60,6 +61,7 @@ const PairDevice = () => {
           // Store the NFC tag data for later use
           setNfcTagData(tagData);
           console.log("NFC tag detected with serial:", tagData.serialNumber);
+          console.log("NFC tag data:", tagData.data);
           
           // Successfully read an NFC tag
           setPairingSuccess(true);
@@ -118,11 +120,18 @@ const PairDevice = () => {
 
     try {
       // Prepare NFC data to store
-      // We store serialNumber as nfc_device_id and any additional data
-      // If the tag had custom data, we'll store it as JSON in a field
-      const nfcData = nfcTagData.data ? nfcTagData.data : null;
+      // We store serialNumber as nfc_device_id and any additional data in nfc_data field
+      // For the demo, we'll store this in a JSON serialized format
+      const nfcSerialNumber = nfcTagData.serialNumber;
+      const nfcData = nfcTagData.data;
 
-      // Insert new key into database
+      console.log("Storing NFC data in database:", {
+        name: keyName,
+        nfc_device_id: nfcSerialNumber,
+        nfc_data: nfcData
+      });
+
+      // Insert new key into database with NFC data
       const { data, error } = await supabase
         .from('keys')
         .insert({
@@ -132,9 +141,9 @@ const PairDevice = () => {
           battery_level: 100,
           is_active: true,
           is_locked: true,
-          nfc_device_id: nfcTagData.serialNumber,
-          // If we had custom data in the tag, this is where we'd store it
-          // We don't need to modify the database schema for this
+          nfc_device_id: nfcSerialNumber,
+          // If we have custom data from the tag, store it
+          nfc_data: nfcData 
         })
         .select()
         .single();

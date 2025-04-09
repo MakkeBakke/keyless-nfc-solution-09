@@ -38,6 +38,7 @@ interface KeyRecord {
   user_id: string;
   is_locked: boolean;
   nfc_device_id?: string;
+  nfc_data?: string | null;
 }
 
 interface KeyActivityRecord {
@@ -81,7 +82,8 @@ const KeyDetail = () => {
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString(),
             user_id: 'demo',
-            nfc_device_id: 'demo-nfc-id'
+            nfc_device_id: 'demo-nfc-id',
+            nfc_data: 'demo-nfc-data'
           };
           
           setKeyData(demoKey);
@@ -117,6 +119,7 @@ const KeyDetail = () => {
           throw keyError;
         }
         
+        console.log("Fetched key data:", keyData);
         setKeyData(keyData as KeyRecord);
         
         const { data: activityData, error: activityError } = await supabase
@@ -165,17 +168,20 @@ const KeyDetail = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
-      const result = await emulateNFC(keyData.id);
+      const result = await emulateNFC(keyData.id, keyData.nfc_data || undefined);
       
       if (!result) {
         throw new Error('NFC emulation failed');
       }
       
+      console.log("NFC emulation result:", result);
+      
       if (session) {
         const { error: updateError } = await supabase
           .from('keys')
           .update({ 
-            last_used: new Date().toISOString() 
+            last_used: new Date().toISOString(),
+            is_locked: !keyData.is_locked
           })
           .eq('id', keyData.id);
           
@@ -186,27 +192,28 @@ const KeyDetail = () => {
           .insert({
             key_id: keyData.id,
             user_id: session.user.id,
-            action: 'unlock'
+            action: keyData.is_locked ? 'unlock' : 'lock'
           });
       }
 
       if (keyData) {
         setKeyData({
           ...keyData,
-          last_used: new Date().toISOString()
+          last_used: new Date().toISOString(),
+          is_locked: !keyData.is_locked
         });
       }
       
       toast({
-        title: t('keyUnlocked'),
-        description: t('successfullyUnlocked'),
+        title: keyData.is_locked ? t('keyUnlocked') : t('keyLocked'),
+        description: keyData.is_locked ? t('successfullyUnlocked') : t('successfullyLocked'),
       });
       
       const newActivity = {
         id: Date.now().toString(),
         key_id: keyData.id,
         user_id: session?.user.id || 'demo',
-        action: 'unlock',
+        action: keyData.is_locked ? 'unlock' : 'lock',
         performed_at: new Date().toISOString()
       };
       

@@ -16,7 +16,7 @@ export interface NFCHookResult {
   startScan: () => Promise<boolean>;
   readTag: () => Promise<NFCTagData | null>;
   writeTag: (data: string) => Promise<boolean>;
-  emulateNFC: (keyId: string) => Promise<string | null>;
+  emulateNFC: (keyId: string, nfcData?: string) => Promise<string | null>;
 }
 
 export function useNFC(): NFCHookResult {
@@ -82,7 +82,7 @@ export function useNFC(): NFCHookResult {
     }
   };
 
-  const emulateNFC = async (keyId: string): Promise<string | null> => {
+  const emulateNFC = async (keyId: string, nfcData?: string): Promise<string | null> => {
     if (!isSupported) {
       setError('NFC is not supported on this device or browser');
       return null;
@@ -91,7 +91,7 @@ export function useNFC(): NFCHookResult {
     try {
       setError(null);
       setIsEmulating(true);
-      const result = await nfcService.emulateNFC(keyId);
+      const result = await nfcService.emulateNFC(keyId, nfcData);
       return result;
     } catch (error) {
       setError((error as Error).message);
