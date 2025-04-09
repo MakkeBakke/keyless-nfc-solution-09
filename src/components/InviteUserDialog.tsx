@@ -32,10 +32,10 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
     setIsSending(true);
     
     try {
-      // Create new permission object
+      // Create new permission object - we no longer need to generate an ID here
+      // as the permissionUtils function will handle it
       const newPermission = {
         key_id: keyId,
-        user_id: 'generated-id-' + Date.now(), // Simulate a user ID
         user_email: inviteEmail,
         user_name: inviteName || inviteEmail.split('@')[0],
         can_unlock: canUnlock,
