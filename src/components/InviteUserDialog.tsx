@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { toast } from '@/hooks/use-toast';
 import { addKeyPermission, KeyPermission } from '@/utils/permissionUtils';
+import { supabase } from '@/integrations/supabase/client';
 
 interface InviteUserDialogProps {
   keyId: string;
@@ -26,12 +27,63 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
   const [canViewHistory, setCanViewHistory] = useState(false);
   const [isSending, setIsSending] = useState(false);
 
+  // Function to send invitation email
+  const sendInvitationEmail = async (receiverEmail: string, userName: string, keyData: any) => {
+    try {
+      // Create email payload
+      const emailPayload = {
+        to: receiverEmail,
+        subject: `${t('invitationToAccessKey')}: ${keyData?.name || 'Smart Lock'}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <h2>${t('youveBeenInvited')}</h2>
+            <p>${userName || t('someone')} ${t('hasInvitedYouToAccessKey')} "${keyData?.name || 'Smart Lock'}".</p>
+            <p>${t('youCanNowAccess')}:</p>
+            <ul>
+              ${canUnlock ? `<li>${t('unlockTheKey')}</li>` : ''}
+              ${canLock ? `<li>${t('lockTheKey')}</li>` : ''}
+              ${canViewHistory ? `<li>${t('viewKeyHistory')}</li>` : ''}
+            </ul>
+            <p>${t('toGetStarted')}</p>
+            <div style="margin: 20px 0;">
+              <a href="${window.location.origin}" style="background-color: #2563eb; color: white; padding: 10px 15px; text-decoration: none; border-radius: 4px;">
+                ${t('openApp')}
+              </a>
+            </div>
+          </div>
+        `
+      };
+
+      // Send email using Supabase Edge Function or a dedicated email service
+      const { error } = await supabase.functions.invoke('send-invitation-email', {
+        body: emailPayload
+      });
+
+      if (error) {
+        console.error('Error sending invitation email:', error);
+        return false;
+      }
+      
+      return true;
+    } catch (error) {
+      console.error('Error sending invitation email:', error);
+      return false;
+    }
+  };
+
   const handleInviteUser = async () => {
     if (!inviteEmail || !keyId) return;
     
     setIsSending(true);
     
     try {
+      // Fetch key data to include in the email
+      const { data: keyData } = await supabase
+        .from('keys')
+        .select('*')
+        .eq('id', keyId)
+        .single();
+      
       // Create new permission object
       const newPermission = {
         key_id: keyId,
@@ -46,9 +98,14 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
       const createdPermission = await addKeyPermission(newPermission);
       
       if (createdPermission) {
+        // Send invitation email
+        const emailSent = await sendInvitationEmail(inviteEmail, inviteName || inviteEmail.split('@')[0], keyData);
+        
         toast({
           title: t('invitationSent'),
-          description: t('userWillReceiveEmail'),
+          description: emailSent 
+            ? t('userWillReceiveEmail') 
+            : t('permissionsAddedButEmailFailed'),
         });
         
         // Notify parent component

@@ -1,6 +1,5 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { v4 as uuidv4 } from "uuid";
 
 // Define the KeyPermission interface
 export interface KeyPermission {
@@ -32,13 +31,25 @@ export const fetchKeyPermissions = async (keyId: string) => {
 };
 
 /**
+ * Generates a UUID v4
+ * This is a simple implementation since we don't want to depend on external libraries
+ */
+const generateUUID = () => {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    const r = (Math.random() * 16) | 0;
+    const v = c === 'x' ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+};
+
+/**
  * Adds a new user permission for a key
  */
 export const addKeyPermission = async (permission: Omit<KeyPermission, 'id' | 'user_id'> & { user_id?: string }) => {
   // Generate a proper UUID for the user_id if not provided
   const permissionWithUuid = {
     ...permission,
-    user_id: permission.user_id || uuidv4()
+    user_id: permission.user_id || generateUUID()
   };
   
   const { data, error } = await supabase
