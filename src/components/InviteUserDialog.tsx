@@ -32,8 +32,7 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
     setIsSending(true);
     
     try {
-      // Create new permission object - we no longer need to generate an ID here
-      // as the permissionUtils function will handle it
+      // Create new permission object
       const newPermission = {
         key_id: keyId,
         user_email: inviteEmail,
