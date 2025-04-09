@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Mail, UserPlus } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
@@ -54,8 +53,10 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
         `
       };
 
-      // Send email using Supabase Edge Function or a dedicated email service
-      const { error } = await supabase.functions.invoke('send-invitation-email', {
+      console.log('Sending invitation email with payload:', JSON.stringify(emailPayload));
+
+      // Send email using Supabase Edge Function
+      const { data, error } = await supabase.functions.invoke('send-invitation-email', {
         body: emailPayload
       });
 
@@ -64,6 +65,7 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
         return false;
       }
       
+      console.log('Email sent successfully:', data);
       return true;
     } catch (error) {
       console.error('Error sending invitation email:', error);
@@ -99,7 +101,7 @@ const InviteUserDialog = ({ keyId, isOpen, onOpenChange, onInviteSuccess }: Invi
       
       if (createdPermission) {
         // Send invitation email
-        const emailSent = await sendInvitationEmail(inviteEmail, inviteName || inviteEmail.split('@')[0], keyData);
+        const emailSent = await sendInvitationEmail(inviteEmail, inviteName || inviteEmail.split('@')[0], keyData || { name: 'Smart Lock' });
         
         toast({
           title: t('invitationSent'),

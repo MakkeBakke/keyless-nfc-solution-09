@@ -1,3 +1,4 @@
+
 import { english } from './english';
 import swedish from './swedish';
 import chinese from './chinese';
@@ -233,7 +234,19 @@ export type TranslationKey =
   | "emulatingNFC"
   | "holdPhoneToReader"
   | "nfcNotSupported"
-  | "useDeviceWithNFC";
+  | "useDeviceWithNFC"
+  // Add the missing translation keys needed for the invitation email
+  | "invitationToAccessKey"
+  | "youveBeenInvited"
+  | "someone"
+  | "hasInvitedYouToAccessKey"
+  | "youCanNowAccess"
+  | "unlockTheKey"
+  | "lockTheKey"
+  | "viewKeyHistory"
+  | "toGetStarted"
+  | "openApp"
+  | "permissionsAddedButEmailFailed";
 
 const translations = {
   english,

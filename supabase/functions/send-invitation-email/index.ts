@@ -42,26 +42,10 @@ Deno.serve(async (req) => {
       )
     }
 
-    // Use your preferred email service here
-    // This is a placeholder for an email service API call
-    // For example, using SendGrid, Mailgun, SES, etc.
-    const emailResponse = await fetch('https://api.youremailservice.com/v1/mail/send', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${emailApiKey}`
-      },
-      body: JSON.stringify({
-        from: emailSender,
-        to: to,
-        subject: subject,
-        html: html
-      })
-    })
-
-    // For demonstration purposes, we're just logging the request
-    // and returning a success response without actually sending an email
+    // For demo purposes, we'll log the email info and return success
+    // In a production environment, you would use an email service API
     console.log(`Email would be sent to: ${to}, Subject: ${subject}`)
+    console.log(`Email content: ${html}`)
     
     // Return success response
     return new Response(
