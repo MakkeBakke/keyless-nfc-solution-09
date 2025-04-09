@@ -205,7 +205,7 @@ const KeyDetail = () => {
       const newActivity = {
         id: Date.now().toString(),
         key_id: keyData.id,
-        user_id: session.user.id,
+        user_id: session?.user.id || 'demo',
         action: 'unlock',
         performed_at: new Date().toISOString()
       };
@@ -297,7 +297,7 @@ const KeyDetail = () => {
       exit={{ opacity: 0 }}
       transition={{ duration: 0.3 }}
     >
-      <Header title={keyData.name} showBackButton />
+      <Header title={keyData?.name || ''} showBackButton />
       
       <div className="max-w-md mx-auto">
         <div className="glass-card p-6 relative overflow-hidden">

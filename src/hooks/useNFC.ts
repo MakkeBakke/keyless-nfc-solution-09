@@ -2,12 +2,19 @@
 import { useState } from 'react';
 import { nfcService } from '@/services/NFCService';
 
+export interface NFCTagData {
+  serialNumber: string;
+  data: string | null;
+}
+
 export interface NFCHookResult {
   isSupported: boolean;
   isScanning: boolean;
   isEmulating: boolean;
+  tagData: NFCTagData | null;
   error: string | null;
   startScan: () => Promise<boolean>;
+  readTag: () => Promise<NFCTagData | null>;
   writeTag: (data: string) => Promise<boolean>;
   emulateNFC: (keyId: string) => Promise<string | null>;
 }
@@ -15,6 +22,7 @@ export interface NFCHookResult {
 export function useNFC(): NFCHookResult {
   const [isScanning, setIsScanning] = useState(false);
   const [isEmulating, setIsEmulating] = useState(false);
+  const [tagData, setTagData] = useState<NFCTagData | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isSupported = nfcService.isSupported();
@@ -33,6 +41,26 @@ export function useNFC(): NFCHookResult {
     } catch (error) {
       setError((error as Error).message);
       return false;
+    } finally {
+      setIsScanning(false);
+    }
+  };
+
+  const readTag = async (): Promise<NFCTagData | null> => {
+    if (!isSupported) {
+      setError('NFC is not supported on this device or browser');
+      return null;
+    }
+
+    try {
+      setIsScanning(true);
+      setError(null);
+      const data = await nfcService.readTag();
+      setTagData(data);
+      return data;
+    } catch (error) {
+      setError((error as Error).message);
+      return null;
     } finally {
       setIsScanning(false);
     }
@@ -77,8 +105,10 @@ export function useNFC(): NFCHookResult {
     isSupported,
     isScanning,
     isEmulating,
+    tagData,
     error,
     startScan,
+    readTag,
     writeTag,
     emulateNFC
   };

@@ -9,7 +9,7 @@ class NFCService {
   }
 
   // Request permission and start scanning for NFC tags
-  async startScan(): Promise<NDEFReader> {
+  async startScan(): Promise<any> {
     if (!this.isSupported()) {
       throw new Error('NFC is not supported on this device or browser');
     }
@@ -21,6 +21,55 @@ class NFCService {
       return ndef;
     } catch (error) {
       console.error('Error starting NFC scan:', error);
+      throw error;
+    }
+  }
+
+  // Read data from an NFC tag and return the serial number and data
+  async readTag(): Promise<{ serialNumber: string, data: string | null }> {
+    if (!this.isSupported()) {
+      throw new Error('NFC is not supported on this device or browser');
+    }
+
+    try {
+      // @ts-ignore - NDEFReader might not be recognized by TypeScript
+      const ndef = new NDEFReader();
+      await ndef.scan();
+      
+      return new Promise((resolve, reject) => {
+        // Set up a timeout if no tag is detected
+        const timeout = setTimeout(() => {
+          reject(new Error('No NFC tag detected within timeout period'));
+        }, 10000); // 10 seconds timeout
+
+        ndef.addEventListener("reading", (event: any) => {
+          clearTimeout(timeout);
+          
+          let textData = null;
+          // Try to extract text data if available
+          if (event.message && event.message.records) {
+            for (const record of event.message.records) {
+              if (record.recordType === "text") {
+                const textDecoder = new TextDecoder();
+                textData = textDecoder.decode(record.data);
+                break;
+              }
+            }
+          }
+          
+          resolve({
+            serialNumber: event.serialNumber,
+            data: textData
+          });
+        });
+
+        ndef.addEventListener("error", (error: any) => {
+          clearTimeout(timeout);
+          reject(error);
+        });
+      });
+    } catch (error) {
+      console.error('Error reading NFC tag:', error);
       throw error;
     }
   }

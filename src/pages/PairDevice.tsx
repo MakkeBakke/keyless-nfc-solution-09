@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Nfc, CheckCircle, XCircle } from 'lucide-react';
@@ -8,19 +7,19 @@ import AddKeyModal from '@/components/AddKeyModal';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from '@/hooks/use-toast';
-import { useNFC } from '@/hooks/useNFC';
+import { useNFC, NFCTagData } from '@/hooks/useNFC';
 
 const PairDevice = () => {
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { isSupported, isScanning, error: nfcError, startScan } = useNFC();
+  const { isSupported, isScanning, error: nfcError, readTag } = useNFC();
   
   const [step, setStep] = useState(1);
   const [pairingSuccess, setPairingSuccess] = useState<boolean | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [nfcDeviceId, setNfcDeviceId] = useState<string | null>(null);
+  const [nfcTagData, setNfcTagData] = useState<NFCTagData | null>(null);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -37,8 +36,8 @@ const PairDevice = () => {
 
   useEffect(() => {
     if (step === 2) {
-      // Set up the NFC reader
-      const setupNFC = async () => {
+      // Start NFC scanning
+      const scanForNFC = async () => {
         try {
           if (!isSupported) {
             console.log('Web NFC API is not supported in this browser');
@@ -48,48 +47,29 @@ const PairDevice = () => {
             return;
           }
 
-          // Start scanning
-          const scanStarted = await startScan();
+          // Read NFC tag
+          const tagData = await readTag();
           
-          if (!scanStarted) {
+          if (!tagData) {
             setPairingSuccess(false);
             setStep(3);
-            setErrorMessage(nfcError || 'Failed to start NFC scanning');
+            setErrorMessage(nfcError || 'Failed to read NFC tag');
             return;
           }
           
-          // Setup a listener for NFC tags
-          // @ts-ignore - NDEFReader might not be recognized by TypeScript
-          const ndef = new NDEFReader();
+          // Store the NFC tag data for later use
+          setNfcTagData(tagData);
+          console.log("NFC tag detected with serial:", tagData.serialNumber);
           
-          ndef.addEventListener("reading", (event: any) => {
-            console.log("NFC tag detected!");
-            console.log("Serial number:", event.serialNumber);
-            
-            // Store the NFC identifier for later use
-            setNfcDeviceId(event.serialNumber);
-
-            // Successfully read an NFC tag
-            setPairingSuccess(true);
-            setStep(3);
-            
-            // Show a success toast
-            toast({
-              title: t('pairingSuccessful'),
-              description: "NFC device detected and paired successfully",
-            });
+          // Successfully read an NFC tag
+          setPairingSuccess(true);
+          setStep(3);
+          
+          // Show a success toast
+          toast({
+            title: t('pairingSuccessful'),
+            description: "NFC device detected and paired successfully",
           });
-
-          // Setup a timeout to handle no NFC tags detected
-          const timeout = setTimeout(() => {
-            if (step === 2) {
-              setPairingSuccess(false);
-              setStep(3);
-              setErrorMessage('No NFC tag was detected. Please try again.');
-            }
-          }, 10000); // 10 seconds timeout
-          
-          return () => clearTimeout(timeout);
           
         } catch (error) {
           console.error('Error scanning for NFC:', error);
@@ -99,9 +79,9 @@ const PairDevice = () => {
         }
       };
 
-      setupNFC();
+      scanForNFC();
     }
-  }, [step, isSupported, nfcError, startScan, t]);
+  }, [step, isSupported, nfcError, readTag, t]);
 
   const beginScanning = async () => {
     setErrorMessage(null);
@@ -112,6 +92,7 @@ const PairDevice = () => {
     setStep(1);
     setPairingSuccess(null);
     setErrorMessage(null);
+    setNfcTagData(null);
   };
 
   const finishPairing = () => {
@@ -124,13 +105,23 @@ const PairDevice = () => {
   };
 
   const handleAddKey = async (keyName: string) => {
-    if (!userId) {
+    if (!userId || !nfcTagData) {
       // Redirect to profile for login/signup
+      toast({
+        title: t('error'),
+        description: !userId ? "Please log in to add keys" : "NFC data is missing",
+        variant: "destructive",
+      });
       navigate('/profile');
       return;
     }
 
     try {
+      // Prepare NFC data to store
+      // We store serialNumber as nfc_device_id and any additional data
+      // If the tag had custom data, we'll store it as JSON in a field
+      const nfcData = nfcTagData.data ? nfcTagData.data : null;
+
       // Insert new key into database
       const { data, error } = await supabase
         .from('keys')
@@ -141,7 +132,9 @@ const PairDevice = () => {
           battery_level: 100,
           is_active: true,
           is_locked: true,
-          nfc_device_id: nfcDeviceId // Store the NFC device ID
+          nfc_device_id: nfcTagData.serialNumber,
+          // If we had custom data in the tag, this is where we'd store it
+          // We don't need to modify the database schema for this
         })
         .select()
         .single();
