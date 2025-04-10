@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Nfc, CheckCircle, XCircle } from 'lucide-react';
@@ -121,7 +120,6 @@ const PairDevice = () => {
     try {
       // Prepare NFC data to store
       // We store serialNumber as nfc_device_id and any additional data in nfc_data field
-      // For the demo, we'll store this in a JSON serialized format
       const nfcSerialNumber = nfcTagData.serialNumber;
       const nfcData = nfcTagData.data;
 

@@ -40,7 +40,7 @@ class NFCService {
         // Set up a timeout if no tag is detected
         const timeout = setTimeout(() => {
           reject(new Error('No NFC tag detected within timeout period'));
-        }, 10000); // 10 seconds timeout
+        }, 15000); // 15 seconds timeout
 
         ndef.addEventListener("reading", (event: any) => {
           clearTimeout(timeout);
@@ -72,6 +72,11 @@ class NFCService {
                 hasData: !!record.data
               });
             }
+          }
+          
+          // If we still don't have any data, create a unique identifier based on the serial number
+          if (!textData) {
+            textData = `nfc-id-${event.serialNumber}`;
           }
           
           resolve({
@@ -112,6 +117,12 @@ class NFCService {
 
   // Emulate NFC tag reading with stored data
   async emulateNFC(keyId: string, nfcData?: string): Promise<string | null> {
+    if (!this.isSupported()) {
+      throw new Error('NFC is not supported on this device or browser');
+    }
+    
+    console.log(`Emulating NFC with data: ${nfcData || 'no data provided'}`);
+    
     // In a real implementation with native plugins, this would use HCE capabilities
     // For now, we'll simulate sending the actual NFC data after a short delay
     return new Promise((resolve) => {

@@ -23,7 +23,6 @@ import ActivityItem from '@/components/ActivityItem';
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Button } from '@/components/ui/button';
 import { useNFC } from '@/hooks/useNFC';
 
 interface KeyRecord {
@@ -120,6 +119,7 @@ const KeyDetail = () => {
         }
         
         console.log("Fetched key data:", keyData);
+        console.log("NFC data stored in database:", keyData.nfc_data);
         setKeyData(keyData as KeyRecord);
         
         const { data: activityData, error: activityError } = await supabase
@@ -168,6 +168,7 @@ const KeyDetail = () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
       
+      console.log("Emulating NFC with stored data:", keyData.nfc_data);
       const result = await emulateNFC(keyData.id, keyData.nfc_data || undefined);
       
       if (!result) {
