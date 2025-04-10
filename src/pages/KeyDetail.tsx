@@ -37,7 +37,13 @@ const KeyDetail = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const { isSupported, error: nfcError, emulateNFC } = useNFC();
+  const { 
+    isSupported, 
+    error: nfcError, 
+    emulateNFC, 
+    emulationResult, 
+    isEmulating 
+  } = useNFC();
   
   const [keyData, setKeyData] = useState<KeyRecord | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
@@ -46,6 +52,7 @@ const KeyDetail = () => {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isNfcEmulating, setIsNfcEmulating] = useState(false);
   const [nfcErrorMessage, setNfcErrorMessage] = useState<string | null>(null);
+  const [unlockAttemptFailed, setUnlockAttemptFailed] = useState(false);
   
   useEffect(() => {
     const fetchKeyData = async () => {
@@ -149,6 +156,7 @@ const KeyDetail = () => {
     setShowAnimation(true);
     setIsNfcEmulating(true);
     setNfcErrorMessage(null);
+    setUnlockAttemptFailed(false);
     
     try {
       const { data: { session } } = await supabase.auth.getSession();
@@ -156,8 +164,17 @@ const KeyDetail = () => {
       console.log("Emulating NFC with stored data:", keyData.nfc_data);
       const result = await emulateNFC(keyData.id, keyData.nfc_data || undefined);
       
-      if (!result) {
-        throw new Error('NFC emulation failed');
+      if (!result.success) {
+        setUnlockAttemptFailed(true);
+        setNfcErrorMessage(result.message);
+        
+        toast({
+          title: t('unlockFailed'),
+          description: result.message,
+          variant: "destructive",
+        });
+        
+        return;
       }
       
       console.log("NFC emulation result:", result);
@@ -207,6 +224,7 @@ const KeyDetail = () => {
     } catch (error) {
       console.error('Error emulating NFC:', error);
       setNfcErrorMessage((error as Error).message);
+      setUnlockAttemptFailed(true);
       
       toast({
         title: t('error'),
@@ -298,6 +316,7 @@ const KeyDetail = () => {
             <UnlockAnimation 
               keyName={keyData.name} 
               isNfcEmulation={isNfcEmulating}
+              failed={unlockAttemptFailed}
             />
           }
           

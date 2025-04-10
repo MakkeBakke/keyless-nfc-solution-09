@@ -7,22 +7,29 @@ export interface NFCTagData {
   data: string | null;
 }
 
+export interface NFCEmulationResult {
+  success: boolean;
+  message: string;
+}
+
 export interface NFCHookResult {
   isSupported: boolean;
   isScanning: boolean;
   isEmulating: boolean;
   tagData: NFCTagData | null;
+  emulationResult: NFCEmulationResult | null;
   error: string | null;
   startScan: () => Promise<boolean>;
   readTag: () => Promise<NFCTagData | null>;
   writeTag: (data: string) => Promise<boolean>;
-  emulateNFC: (keyId: string, nfcData?: string) => Promise<string | null>;
+  emulateNFC: (keyId: string, nfcData?: string) => Promise<NFCEmulationResult>;
 }
 
 export function useNFC(): NFCHookResult {
   const [isScanning, setIsScanning] = useState(false);
   const [isEmulating, setIsEmulating] = useState(false);
   const [tagData, setTagData] = useState<NFCTagData | null>(null);
+  const [emulationResult, setEmulationResult] = useState<NFCEmulationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const isSupported = nfcService.isSupported();
@@ -82,20 +89,26 @@ export function useNFC(): NFCHookResult {
     }
   };
 
-  const emulateNFC = async (keyId: string, nfcData?: string): Promise<string | null> => {
+  const emulateNFC = async (keyId: string, nfcData?: string): Promise<NFCEmulationResult> => {
     if (!isSupported) {
       setError('NFC is not supported on this device or browser');
-      return null;
+      return { success: false, message: 'NFC is not supported on this device or browser' };
     }
 
     try {
       setError(null);
       setIsEmulating(true);
+      setEmulationResult(null);
+      
       const result = await nfcService.emulateNFC(keyId, nfcData);
+      setEmulationResult(result);
       return result;
     } catch (error) {
       setError((error as Error).message);
-      return null;
+      return { 
+        success: false, 
+        message: `Error: ${(error as Error).message}` 
+      };
     } finally {
       setIsEmulating(false);
     }
@@ -106,6 +119,7 @@ export function useNFC(): NFCHookResult {
     isScanning,
     isEmulating,
     tagData,
+    emulationResult,
     error,
     startScan,
     readTag,
