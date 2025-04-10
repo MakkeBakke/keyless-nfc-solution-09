@@ -21,24 +21,9 @@ import Header from '@/components/Header';
 import UnlockAnimation from '@/components/UnlockAnimation';
 import ActivityItem from '@/components/ActivityItem';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { supabase, KeyRecord } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNFC } from '@/hooks/useNFC';
-
-interface KeyRecord {
-  id: string;
-  name: string;
-  type: string;
-  battery_level?: number;
-  is_active: boolean;
-  last_used?: string;
-  created_at: string;
-  updated_at: string;
-  user_id: string;
-  is_locked: boolean;
-  nfc_device_id?: string;
-  nfc_data?: string | null;
-}
 
 interface KeyActivityRecord {
   id: string;
@@ -70,7 +55,7 @@ const KeyDetail = () => {
         const { data: { session } } = await supabase.auth.getSession();
         
         if (!session) {
-          const demoKey = {
+          const demoKey: KeyRecord = {
             id: id,
             name: 'Demo Key',
             type: 'Smart Lock',
