@@ -20,7 +20,7 @@ export type ReadNotification = {
   updated_at: string;
 }
 
-// Add a custom type for KeyRecord that includes the nfc_data field
+// Custom type for KeyRecord that includes the nfc_data field
 export type KeyRecord = {
   id: string;
   name: string;
