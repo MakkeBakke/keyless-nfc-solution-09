@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Bell, User, Shield, Smartphone, Moon, Sun, LogOut } from 'lucide-react';
+import { Bell, User, Shield, Smartphone, Moon, Sun, LogOut, Lock } from 'lucide-react';
 import Header from '@/components/Header';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -10,14 +10,19 @@ import { supabase } from '@/integrations/supabase/client';
 import { useTheme } from '@/contexts/ThemeContext';
 import LanguageSelector from '@/components/LanguageSelector';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { usePinSecurity } from '@/contexts/PinSecurityContext';
+import PinVerificationDialog from '@/components/PinVerificationDialog';
 
 const Settings = () => {
   const navigate = useNavigate();
   const { theme, setTheme } = useTheme();
   const { t } = useLanguage();
+  const { isPinSet, requireVerification } = usePinSecurity();
   const [notifications, setNotifications] = useState(true);
   const [biometrics, setBiometrics] = useState(true);
   const [user, setUser] = useState<any>(null);
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [pendingAction, setPendingAction] = useState<(() => void) | null>(null);
   
   useEffect(() => {
     const checkAuth = async () => {
@@ -61,23 +66,42 @@ const Settings = () => {
     };
   }, []);
   
+  const withPinVerification = (action: () => void) => {
+    setPendingAction(() => action);
+    requireVerification();
+    setShowPinDialog(true);
+  };
+  
   const handleLogout = async () => {
-    const { error } = await supabase.auth.signOut();
-    
-    if (error) {
+    withPinVerification(async () => {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        toast({
+          title: t('error'),
+          description: t('error'),
+          variant: "destructive",
+        });
+        return;
+      }
+      
       toast({
-        title: t('error'),
-        description: t('error'),
-        variant: "destructive",
+        title: t('signOut'),
+        description: t('signOut'),
       });
-      return;
-    }
-    
-    toast({
-      title: t('signOut'),
-      description: t('signOut'),
+      navigate('/profile');
     });
-    navigate('/profile');
+  };
+
+  const handlePinDialogClose = () => {
+    setShowPinDialog(false);
+    setPendingAction(null);
+  };
+
+  const handlePinVerificationSuccess = () => {
+    if (pendingAction) {
+      pendingAction();
+    }
   };
 
   const handleDarkModeToggle = (checked: boolean) => {
@@ -106,6 +130,10 @@ const Settings = () => {
 
   const handleProfileClick = () => {
     navigate('/profile');
+  };
+
+  const handlePinSettingsClick = () => {
+    setShowPinDialog(true);
   };
   
   return (
@@ -136,6 +164,13 @@ const Settings = () => {
           <h3 className="font-medium mb-4">{t('appSettings')}</h3>
           
           <div className="space-y-4">
+            <SettingItem 
+              icon={<Lock />}
+              title={t('securityPin')}
+              description={isPinSet ? t('changePinDesc') : t('setupPinDesc')}
+              onClick={handlePinSettingsClick}
+            />
+            
             <SettingItem 
               icon={<Bell />}
               title={t('notifications')}
@@ -176,7 +211,7 @@ const Settings = () => {
               icon={<Smartphone />}
               title={t('deviceManagement')}
               description={t('deviceManagementDesc')}
-              onClick={() => navigate('/pair')}
+              onClick={() => withPinVerification(() => navigate('/pair'))}
             />
             
             <LanguageSelector />
@@ -195,6 +230,12 @@ const Settings = () => {
           </div>
         )}
       </div>
+      
+      <PinVerificationDialog 
+        isOpen={showPinDialog}
+        onClose={handlePinDialogClose}
+        onSuccess={handlePinVerificationSuccess}
+      />
     </div>
   );
 };

@@ -1,5 +1,6 @@
+import { TranslationDefinition } from '.';
 
-export const english = {
+const english: TranslationDefinition = {
   // General
   save: 'Save',
   cancel: 'Cancel',
@@ -180,6 +181,7 @@ export const english = {
   configureNotifications: 'Configure Notifications',
   deleteKey: 'Delete Key',
   confirmDeleteKey: 'Are you sure you want to delete this key?',
+  enterPinToDeleteKey: 'Enter your PIN to delete this key',
   
   // Language
   language: 'Language',
@@ -279,3 +281,5 @@ export const english = {
   tryAgainPlacingPhone: 'Please try again by placing your phone closer to the reader',
   unlockFailed: 'Unlock Failed'
 };
+
+export default english;

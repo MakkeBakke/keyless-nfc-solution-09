@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Shield, ChevronRight, ArrowLeft } from 'lucide-react';
@@ -12,26 +11,29 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
 import { KeySecuritySettings, getSecuritySettings, saveSecuritySettings } from '@/utils/localStorageUtils';
+import { usePinSecurity } from '@/contexts/PinSecurityContext';
+import PinVerificationDialog from '@/components/PinVerificationDialog';
 
 const KeySecurity = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
+  const { requireVerification } = usePinSecurity();
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [keyData, setKeyData] = useState<any>(null);
   const [securitySettings, setSecuritySettings] = useState<KeySecuritySettings | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [pendingSettings, setPendingSettings] = useState<KeySecuritySettings | null>(null);
 
   useEffect(() => {
-    // Check if user is authenticated
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       
       if (session?.user) {
         setUserId(session.user.id);
       } else {
-        // For demo purposes, set a fake user ID
         setUserId('demo-user-id');
       }
     };
@@ -46,7 +48,6 @@ const KeySecurity = () => {
       setLoading(true);
       
       try {
-        // Fetch key data from database
         const { data, error } = await supabase
           .from('keys')
           .select('*')
@@ -54,7 +55,6 @@ const KeySecurity = () => {
           .single();
         
         if (error) {
-          // For demo, provide mock data if there's an error
           setKeyData({
             id,
             name: 'Demo Key',
@@ -67,7 +67,6 @@ const KeySecurity = () => {
           setKeyData(data);
         }
         
-        // Get security settings from local storage
         const settings = getSecuritySettings(id, userId);
         setSecuritySettings(settings);
       } catch (error) {
@@ -106,11 +105,23 @@ const KeySecurity = () => {
   const handleSaveSettings = async () => {
     if (!securitySettings) return;
     
+    setPendingSettings(securitySettings);
+    requireVerification();
+    setShowPinDialog(true);
+  };
+
+  const handlePinDialogClose = () => {
+    setShowPinDialog(false);
+    setPendingSettings(null);
+  };
+
+  const handlePinVerificationSuccess = async () => {
+    if (!pendingSettings) return;
+    
     setSaving(true);
     
     try {
-      // Save to localStorage
-      saveSecuritySettings(securitySettings);
+      saveSecuritySettings(pendingSettings);
       
       toast({
         title: t('settingsSaved'),
@@ -125,6 +136,7 @@ const KeySecurity = () => {
       });
     } finally {
       setSaving(false);
+      setPendingSettings(null);
     }
   };
 
@@ -254,6 +266,14 @@ const KeySecurity = () => {
           </Button>
         </div>
       </div>
+      
+      <PinVerificationDialog 
+        isOpen={showPinDialog}
+        onClose={handlePinDialogClose}
+        onSuccess={handlePinVerificationSuccess}
+        title={t('securityVerification')}
+        description={t('enterPinToSaveSettings')}
+      />
     </motion.div>
   );
 };

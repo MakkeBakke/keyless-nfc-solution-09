@@ -24,6 +24,8 @@ import { toast } from '@/hooks/use-toast';
 import { supabase, KeyRecord } from '@/integrations/supabase/client';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { useNFC } from '@/hooks/useNFC';
+import { usePinSecurity } from '@/contexts/PinSecurityContext';
+import PinVerificationDialog from '@/components/PinVerificationDialog';
 
 interface KeyActivityRecord {
   id: string;
@@ -44,6 +46,7 @@ const KeyDetail = () => {
     emulationResult, 
     isEmulating 
   } = useNFC();
+  const { requireVerification } = usePinSecurity();
   
   const [keyData, setKeyData] = useState<KeyRecord | null>(null);
   const [showAnimation, setShowAnimation] = useState(false);
@@ -53,6 +56,8 @@ const KeyDetail = () => {
   const [isNfcEmulating, setIsNfcEmulating] = useState(false);
   const [nfcErrorMessage, setNfcErrorMessage] = useState<string | null>(null);
   const [unlockAttemptFailed, setUnlockAttemptFailed] = useState(false);
+  const [showPinDialog, setShowPinDialog] = useState(false);
+  const [deletePending, setDeletePending] = useState(false);
   
   useEffect(() => {
     const fetchKeyData = async () => {
@@ -239,6 +244,17 @@ const KeyDetail = () => {
     }
   };
   
+  const initiateDeleteKey = () => {
+    setShowDeleteDialog(true);
+  };
+  
+  const confirmDeleteKey = () => {
+    setShowDeleteDialog(false);
+    setDeletePending(true);
+    requireVerification();
+    setShowPinDialog(true);
+  };
+  
   const handleDeleteKey = async () => {
     if (!keyData) return;
     
@@ -267,6 +283,19 @@ const KeyDetail = () => {
         description: t('failedToDeleteKey'),
         variant: "destructive",
       });
+    } finally {
+      setDeletePending(false);
+    }
+  };
+
+  const handlePinDialogClose = () => {
+    setShowPinDialog(false);
+    setDeletePending(false);
+  };
+
+  const handlePinVerificationSuccess = () => {
+    if (deletePending) {
+      handleDeleteKey();
     }
   };
   
@@ -509,7 +538,7 @@ const KeyDetail = () => {
         
         <div className="mt-8">
           <button 
-            onClick={() => setShowDeleteDialog(true)}
+            onClick={initiateDeleteKey}
             className="flex items-center justify-center space-x-2 text-red-500 hover:text-red-600 transition-colors w-full py-3"
           >
             <Trash2 className="w-5 h-5" />
@@ -529,7 +558,7 @@ const KeyDetail = () => {
           <AlertDialogFooter>
             <AlertDialogCancel>{t('cancel')}</AlertDialogCancel>
             <AlertDialogAction 
-              onClick={handleDeleteKey}
+              onClick={confirmDeleteKey}
               className="bg-red-500 text-white hover:bg-red-600"
             >
               {t('delete')}
@@ -537,6 +566,14 @@ const KeyDetail = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <PinVerificationDialog 
+        isOpen={showPinDialog}
+        onClose={handlePinDialogClose}
+        onSuccess={handlePinVerificationSuccess}
+        title={t('securityVerification')}
+        description={t('enterPinToDeleteKey')}
+      />
     </motion.div>
   );
 };

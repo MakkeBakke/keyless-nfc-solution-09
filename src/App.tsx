@@ -7,6 +7,7 @@ import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
 import { AnimatePresence } from "framer-motion";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { PinSecurityProvider } from "./contexts/PinSecurityContext";
 import Index from "./pages/Index";
 import KeyDetail from "./pages/KeyDetail";
 import KeyPermissions from "./pages/KeyPermissions";
@@ -69,13 +70,15 @@ const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
       <LanguageProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner position="top-center" closeButton />
-          <BrowserRouter>
-            <AnimatedRoutes />
-          </BrowserRouter>
-        </TooltipProvider>
+        <PinSecurityProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner position="top-center" closeButton />
+            <BrowserRouter>
+              <AnimatedRoutes />
+            </BrowserRouter>
+          </TooltipProvider>
+        </PinSecurityProvider>
       </LanguageProvider>
     </ThemeProvider>
   </QueryClientProvider>
