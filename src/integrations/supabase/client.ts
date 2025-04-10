@@ -19,3 +19,19 @@ export type ReadNotification = {
   created_at: string;
   updated_at: string;
 }
+
+// Add a custom type for KeyRecord that includes the nfc_data field
+export type KeyRecord = {
+  id: string;
+  name: string;
+  type: string;
+  battery_level?: number | null;
+  is_active: boolean;
+  last_used?: string | null;
+  created_at: string;
+  updated_at: string;
+  user_id: string;
+  is_locked: boolean;
+  nfc_device_id?: string | null;
+  nfc_data?: string | null;
+}
