@@ -1,3 +1,4 @@
+
 export default {
   // General
   save: '保存',
@@ -271,5 +272,10 @@ export default {
   emulatingNFC: '模拟NFC',
   holdPhoneToReader: '将手机靠近读卡器',
   nfcNotSupported: '不支持NFC',
-  useDeviceWithNFC: '请使用支持NFC功能的设备'
+  useDeviceWithNFC: '请使用支持NFC功能的设备',
+  
+  // New error messages for NFC verification
+  verificationFailed: '验证失败',
+  tryAgainPlacingPhone: '请将手机靠近读卡器重试',
+  unlockFailed: '解锁失败'
 };

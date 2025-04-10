@@ -235,7 +235,6 @@ export type TranslationKey =
   | "holdPhoneToReader"
   | "nfcNotSupported"
   | "useDeviceWithNFC"
-  // Add the missing translation keys needed for the invitation email
   | "invitationToAccessKey"
   | "youveBeenInvited"
   | "someone"
@@ -246,7 +245,11 @@ export type TranslationKey =
   | "viewKeyHistory"
   | "toGetStarted"
   | "openApp"
-  | "permissionsAddedButEmailFailed";
+  | "permissionsAddedButEmailFailed"
+  // Add the missing translation keys
+  | "verificationFailed"
+  | "tryAgainPlacingPhone"
+  | "unlockFailed";
 
 const translations = {
   english,

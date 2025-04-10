@@ -1,3 +1,4 @@
+
 export const english = {
   // General
   save: 'Save',
@@ -271,5 +272,10 @@ export const english = {
   emulatingNFC: 'Emulating NFC',
   holdPhoneToReader: 'Hold phone to reader',
   nfcNotSupported: 'NFC is not supported',
-  useDeviceWithNFC: 'Please use a device with NFC capabilities'
+  useDeviceWithNFC: 'Please use a device with NFC capabilities',
+  
+  // New error messages for NFC verification
+  verificationFailed: 'Verification Failed',
+  tryAgainPlacingPhone: 'Please try again by placing your phone closer to the reader',
+  unlockFailed: 'Unlock Failed'
 };
