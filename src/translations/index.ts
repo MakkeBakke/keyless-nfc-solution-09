@@ -245,7 +245,6 @@ export type TranslationKey =
   | "toGetStarted"
   | "openApp"
   | "permissionsAddedButEmailFailed"
-  // Verification and PIN related translation keys
   | "verificationFailed"
   | "tryAgainPlacingPhone" 
   | "unlockFailed"
@@ -270,9 +269,10 @@ export type TranslationKey =
   | "edit"
   | "success"
   | "password"
-  | "updateProfile" // Added updateProfile translation key
+  | "updateProfile"
   | "signedOut"
-  | "signedIn"; // Added signed out/in translation keys
+  | "signedIn"
+  | "notificationsSetting"; // Added notificationsSetting translation key
 
 const translations = {
   english,

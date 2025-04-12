@@ -293,7 +293,10 @@ const english: TranslationDefinition = {
   enterPinToSaveSettings: 'Enter your PIN to save security settings',
   securityPin: 'Security PIN',
   changePinDesc: 'Change your security PIN',
-  setupPinDesc: 'Set up a PIN for additional security'
+  setupPinDesc: 'Set up a PIN for additional security',
+  
+  // Additional keys for Settings page
+  unknown: 'Unknown'
 };
 
 export default english;

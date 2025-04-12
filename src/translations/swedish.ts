@@ -293,7 +293,10 @@ const swedish: TranslationDefinition = {
   enterPinToSaveSettings: 'Ange din PIN-kod för att spara säkerhetsinställningar',
   securityPin: 'Säkerhets-PIN',
   changePinDesc: 'Ändra din säkerhets-PIN',
-  setupPinDesc: 'Ställ in en PIN-kod för extra säkerhet'
+  setupPinDesc: 'Ställ in en PIN-kod för extra säkerhet',
+  
+  // Additional keys for Settings page
+  unknown: 'Okänd'
 };
 
 export default swedish;

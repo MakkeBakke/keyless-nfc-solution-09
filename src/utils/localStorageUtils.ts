@@ -7,6 +7,19 @@ export interface KeySecuritySettings {
   vibration_detection: boolean;
 }
 
+export type KeyNotificationSettings = {
+  all_activity: boolean;
+  unlock_events: boolean;
+  lock_events: boolean;
+  permission_changes: boolean;
+  low_battery: boolean;
+  attempts_to_unlock: boolean;
+  security_alerts: boolean;
+  access_requests: boolean;
+  userId: string;
+  keyId: string;
+};
+
 export const getSecuritySettings = (keyId: string, userId: string): KeySecuritySettings => {
   try {
     const key = `security_settings_${keyId}_${userId}`;
