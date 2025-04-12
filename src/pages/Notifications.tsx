@@ -3,7 +3,6 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { getReadNotifications } from '@/utils/localStorageUtils';
 import Header from '@/components/Header';
 import NotificationsHeader from '@/components/notifications/NotificationsHeader';
 import NotificationsList from '@/components/notifications/NotificationsList';
@@ -38,7 +37,7 @@ const Notifications = () => {
         setUserId(session.user.id);
         // Load read notifications from localStorage first
         await fetchReadNotifications(session.user.id);
-        fetchNotifications(session.user.id);
+        await fetchNotifications(session.user.id);
       } else {
         // For demo, show sample notifications if user is not authenticated
         const demoUserId = 'demo-user-id';

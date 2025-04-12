@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { supabase, ReadNotification } from '@/integrations/supabase/client';
 import { NotificationData } from '@/components/ActivityItem';
@@ -41,6 +40,10 @@ export const useNotifications = (userId: string | null) => {
         
         // Update local storage with merged IDs
         saveAllReadNotifications(uid, mergedIds);
+      } else {
+        // If no database entries, use local storage
+        const localReadIds = getReadNotifications(uid);
+        setReadNotificationIds(localReadIds);
       }
     } catch (error) {
       console.error('Error fetching read notifications:', error);
@@ -160,16 +163,17 @@ export const useNotifications = (userId: string | null) => {
         return prev;
       });
       
-      // Then save to database
+      // Then save to database - use ON CONFLICT DO NOTHING to handle duplicates
       const { error } = await supabase
         .from('read_notifications')
-        .upsert(
-          { notification_id: notificationId, user_id: userId }
-        );
+        .insert({
+          notification_id: notificationId,
+          user_id: userId
+        })
+        .select();
         
       if (error) {
-        // If database error, we still have the local storage update
-        console.error('Error saving to database, but local storage updated:', error);
+        console.error('Error saving to database:', error);
       }
     } catch (error) {
       console.error('Error marking notification as read:', error);
@@ -218,47 +222,26 @@ export const useNotifications = (userId: string | null) => {
         
       if (unreadIds.length === 0) return;
       
-      // First update local storage
-      saveAllReadNotifications(userId, unreadIds);
-      
-      // Update state immediately
+      // Update state immediately for better UX
       setReadNotificationIds(prev => [...new Set([...prev, ...unreadIds])]);
       setNotifications(prevNotifications => 
         prevNotifications.map(notification => ({ ...notification, read: true }))
       );
       
-      // Fetch existing read notifications to avoid duplicates
-      const { data: existingReadNotifications, error: fetchError } = await supabase
-        .from('read_notifications')
-        .select('notification_id')
-        .eq('user_id', userId)
-        .in('notification_id', unreadIds);
+      // First update local storage with all notification IDs
+      saveAllReadNotifications(userId, unreadIds);
       
-      if (fetchError) {
-        console.error('Error fetching existing read notifications:', fetchError);
-      }
-      
-      // Filter out notification IDs that are already marked as read
-      const existingIds = existingReadNotifications ? 
-        existingReadNotifications.map(n => n.notification_id) : [];
-      
-      const newUnreadIds = unreadIds.filter(id => !existingIds.includes(id));
-      
-      if (newUnreadIds.length === 0) {
-        // All notifications are already marked as read in the database
-        return;
-      }
-      
-      // Create batch of upsert objects for new unread notifications
-      const upsertData = newUnreadIds.map(id => ({
+      // For each unread notification, create an insert object
+      const insertData = unreadIds.map(id => ({
         notification_id: id,
         user_id: userId
       }));
       
-      // Upsert new read statuses to the read_notifications table
+      // Insert all at once with ON CONFLICT DO NOTHING to handle duplicates
       const { error } = await supabase
         .from('read_notifications')
-        .upsert(upsertData);
+        .insert(insertData)
+        .select();
         
       if (error) {
         console.error('Database error when marking all as read:', error);
