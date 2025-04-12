@@ -289,7 +289,11 @@ export type TranslationKey =
   | "configureNFC"
   | "notificationsSettings"
   | "enableNotifications"
-  | "activityHistory";
+  | "activityHistory"
+  | "nfcInstructionsTitle"
+  | "nfcInstructions"
+  | "devicePairedSuccessfully"
+  | "deviceNotFound";
 
 const translations = {
   english,
