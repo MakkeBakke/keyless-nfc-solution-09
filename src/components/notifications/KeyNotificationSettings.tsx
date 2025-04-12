@@ -62,13 +62,15 @@ const KeyNotificationSettingsPanel = ({
     <div className="glass-card mb-4 p-0 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
       {toggleItems.map((item, index) => {
         const isLastItem = index === toggleItems.length - 1;
+        // Convert the value to a boolean explicitly to avoid type errors
+        const isChecked = Boolean(settings[item.field]);
         
         return (
           <div key={item.field} className={isLastItem ? "" : "border-b border-gray-100 dark:border-gray-700"}>
             <NotificationToggleItem
               title={item.title}
               description={item.description}
-              checked={settings[item.field] || false}
+              checked={isChecked}
               onCheckedChange={(checked) => onToggleChange(item.field, checked)}
             />
           </div>
