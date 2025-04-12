@@ -121,7 +121,6 @@ const english: TranslationDefinition = {
   pairingFailed: "Pairing Failed",
   deviceNotFound: "Device not found",
 
-  
   // Activity and Key Management
   lastUsed: 'Last used',
   unlock: 'Unlock',
@@ -296,7 +295,32 @@ const english: TranslationDefinition = {
   setupPinDesc: 'Set up a PIN for additional security',
   
   // Additional keys for Settings page
-  unknown: 'Unknown'
+  unknown: 'Unknown',
+  
+  // Missing keys
+  minutes: 'minutes',
+  keyAdded: 'Key Added',
+  hasBeenAddedToYourKeys: 'has been added to your keys',
+  failedToAddKey: 'Failed to add key',
+  nfcWriting: 'Writing to NFC...',
+  nfcWriteSuccess: 'Successfully written to NFC',
+  nfcWriteError: 'Error writing to NFC',
+  holdKeyToUnlock: 'Hold key to unlock',
+  presentPhoneToLock: 'Present phone to lock',
+  nfcWriteInstructions: 'Hold your device near the NFC tag to write data',
+  nfcSuccessfullyWritten: 'NFC tag successfully written',
+  nfcWriteFailed: 'Failed to write to NFC tag',
+  permissionsAddedButEmailFailed: 'Permissions added but email failed to send',
+  invitationToAccessKey: 'Invitation to access key',
+  youveBeenInvited: 'You\'ve been invited',
+  someone: 'Someone',
+  hasInvitedYouToAccessKey: 'has invited you to access a key',
+  youCanNowAccess: 'You can now access',
+  unlockTheKey: 'Unlock the key',
+  lockTheKey: 'Lock the key',
+  viewKeyHistory: 'View key history',
+  toGetStarted: 'To get started',
+  openApp: 'Open app'
 };
 
 export default english;

@@ -296,7 +296,32 @@ const swedish: TranslationDefinition = {
   setupPinDesc: 'Ställ in en PIN-kod för extra säkerhet',
   
   // Additional keys for Settings page
-  unknown: 'Okänd'
+  unknown: 'Okänd',
+  
+  // Missing keys
+  minutes: 'minuter',
+  keyAdded: 'Nyckel tillagd',
+  hasBeenAddedToYourKeys: 'har lagts till i dina nycklar',
+  failedToAddKey: 'Kunde inte lägga till nyckel',
+  nfcWriting: 'Skriver till NFC...',
+  nfcWriteSuccess: 'Skrivning till NFC lyckades',
+  nfcWriteError: 'Fel vid skrivning till NFC',
+  holdKeyToUnlock: 'Håll nyckeln för att låsa upp',
+  presentPhoneToLock: 'Håll fram telefonen för att låsa',
+  nfcWriteInstructions: 'Håll din enhet nära NFC-taggen för att skriva data',
+  nfcSuccessfullyWritten: 'NFC-tagg har skrivits',
+  nfcWriteFailed: 'Kunde inte skriva till NFC-tagg',
+  permissionsAddedButEmailFailed: 'Behörigheter lades till men e-post kunde inte skickas',
+  invitationToAccessKey: 'Inbjudan till att få åtkomst till nyckel',
+  youveBeenInvited: 'Du har blivit inbjuden',
+  someone: 'Någon',
+  hasInvitedYouToAccessKey: 'har bjudit in dig att få åtkomst till en nyckel',
+  youCanNowAccess: 'Du kan nu komma åt',
+  unlockTheKey: 'Låsa upp nyckeln',
+  lockTheKey: 'Låsa nyckeln',
+  viewKeyHistory: 'Visa nyckelhistorik',
+  toGetStarted: 'För att komma igång',
+  openApp: 'Öppna appen'
 };
 
 export default swedish;
