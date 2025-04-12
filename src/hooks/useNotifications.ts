@@ -227,13 +227,35 @@ export const useNotifications = (userId: string | null) => {
         prevNotifications.map(notification => ({ ...notification, read: true }))
       );
       
-      // Create batch of upsert objects for database
-      const upsertData = unreadIds.map(id => ({
+      // Fetch existing read notifications to avoid duplicates
+      const { data: existingReadNotifications, error: fetchError } = await supabase
+        .from('read_notifications')
+        .select('notification_id')
+        .eq('user_id', userId)
+        .in('notification_id', unreadIds);
+      
+      if (fetchError) {
+        console.error('Error fetching existing read notifications:', fetchError);
+      }
+      
+      // Filter out notification IDs that are already marked as read
+      const existingIds = existingReadNotifications ? 
+        existingReadNotifications.map(n => n.notification_id) : [];
+      
+      const newUnreadIds = unreadIds.filter(id => !existingIds.includes(id));
+      
+      if (newUnreadIds.length === 0) {
+        // All notifications are already marked as read in the database
+        return;
+      }
+      
+      // Create batch of upsert objects for new unread notifications
+      const upsertData = newUnreadIds.map(id => ({
         notification_id: id,
         user_id: userId
       }));
       
-      // Upsert all read statuses to the read_notifications table
+      // Upsert new read statuses to the read_notifications table
       const { error } = await supabase
         .from('read_notifications')
         .upsert(upsertData);
