@@ -269,7 +269,10 @@ export type TranslationKey =
   | "setupPinDesc"
   | "edit"
   | "success"
-  | "password"; // Added password translation key
+  | "password"
+  | "updateProfile" // Added updateProfile translation key
+  | "signedOut"
+  | "signedIn"; // Added signed out/in translation keys
 
 const translations = {
   english,
