@@ -268,7 +268,8 @@ export type TranslationKey =
   | "changePinDesc"
   | "setupPinDesc"
   | "edit"
-  | "success";
+  | "success"
+  | "password"; // Added password translation key
 
 const translations = {
   english,
