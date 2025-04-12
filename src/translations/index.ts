@@ -293,7 +293,17 @@ export type TranslationKey =
   | "nfcInstructionsTitle"
   | "nfcInstructions"
   | "devicePairedSuccessfully"
-  | "deviceNotFound";
+  | "deviceNotFound"
+  | "invitationToAccessKey"
+  | "youveBeenInvited"
+  | "someone"
+  | "hasInvitedYouToAccessKey"
+  | "youCanNowAccess"
+  | "unlockTheKey"
+  | "lockTheKey"
+  | "viewKeyHistory"
+  | "toGetStarted"
+  | "openApp";
 
 const translations = {
   english,
