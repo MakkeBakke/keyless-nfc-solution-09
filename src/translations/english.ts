@@ -290,7 +290,6 @@ const english: TranslationDefinition = {
   failedToSetPin: 'Failed to set PIN',
   incorrectPin: 'Incorrect PIN. Please try again.',
   securityVerification: 'Security Verification',
-  enterPinToDeleteKey: 'Enter your PIN to delete this key',
   enterPinToSaveSettings: 'Enter your PIN to save security settings',
   securityPin: 'Security PIN',
   changePinDesc: 'Change your security PIN',

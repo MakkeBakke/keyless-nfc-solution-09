@@ -311,8 +311,8 @@ const KeyNotifications = () => {
                 </p>
               </div>
               <Switch 
-                checked={notificationSettings?.attempts_to_unlock || false}
-                onCheckedChange={(checked) => handleToggleChange('attempts_to_unlock', checked)}
+                checked={notificationSettings?.unlock_attempts || false}
+                onCheckedChange={(checked) => handleToggleChange('unlock_attempts', checked)}
               />
             </div>
           </div>

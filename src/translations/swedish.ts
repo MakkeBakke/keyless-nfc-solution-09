@@ -1,5 +1,7 @@
 
-export default {
+import { TranslationDefinition } from '.';
+
+const swedish: TranslationDefinition = {
   // General
   save: 'Spara',
   cancel: 'Avbryt',
@@ -22,6 +24,7 @@ export default {
   updateProfile: 'Uppdatera profil',
   signedOut: 'Utloggad',
   signedIn: 'Inloggad',
+  permissions: 'Behörigheter',
   
   // Navigation
   home: 'Hem',
@@ -88,7 +91,6 @@ export default {
   yesterday: 'Igår',
   demohoursago: 'för 2 timmar sedan',
   keyInformation: 'Nyckelinformation',
-  permissions: 'Behörigheter',
   securitySettings: 'Säkerhetsinställningar',
   manageSecuritySettings: 'Hantera säkerhetsinställningar för din nyckel',
   lockStatus: 'Låsstatus',
@@ -180,6 +182,7 @@ export default {
   configureNotifications: 'Konfigurera notiser',
   deleteKey: 'Ta bort nyckel',
   confirmDeleteKey: 'Är du säker på att du vill ta bort denna nyckel?',
+  enterPinToDeleteKey: 'Ange din PIN-kod för att ta bort denna nyckel',
   
   // Language
   language: 'Språk',
@@ -212,12 +215,6 @@ export default {
   failedToLoadNotificationSettings: 'Kunde inte ladda notisinställningar',
   
   // Key Security
-  autoLock: 'Autolås',
-  autoLockDescription: 'Lås dörren automatiskt efter upplåsning',
-  autoLockDelay: 'Autolåsfördröjning',
-  minutes: 'minuter',
-  geofencing: 'Geofencing',
-  geofencingDescription: 'Lås/upplås automatiskt baserat på din plats',
   twoFactorAuth: 'Tvåfaktorsautentisering',
   twoFactorAuthDescription: 'Kräv en andra verifieringsmetod',
   historyRetention: 'Historiksparning',
@@ -264,5 +261,39 @@ export default {
   userWillReceiveEmail: 'Användaren får ett e-postmeddelande med instruktioner',
   userAlreadyHasAccess: 'Denna användare har redan åtkomst',
   failedToInviteUser: 'Kunde inte bjuda in användare',
-  failedToLoadPermissions: 'Kunde inte ladda behörigheter'
+  failedToLoadPermissions: 'Kunde inte ladda behörigheter',
+  
+  // NFC-related messages
+  tapToUnlock: 'Tryck för att låsa upp',
+  placePhoneNearReader: 'Placera telefonen nära läsaren',
+  emulatingNFC: 'Emulerar NFC',
+  holdPhoneToReader: 'Håll telefonen mot läsaren',
+  nfcNotSupported: 'NFC stöds inte',
+  useDeviceWithNFC: 'Använd en enhet med NFC-funktionalitet',
+  
+  // New error messages for NFC verification
+  verificationFailed: 'Verifiering misslyckades',
+  tryAgainPlacingPhone: 'Försök igen genom att placera telefonen närmare läsaren',
+  unlockFailed: 'Upplåsning misslyckades',
+  
+  // PIN Security related translations
+  pinsDontMatch: 'PIN-koderna matchar inte. Försök igen.',
+  enterSecurityPin: 'Ange säkerhets-PIN',
+  createSecurityPin: 'Skapa säkerhets-PIN',
+  confirmSecurityPin: 'Bekräfta säkerhets-PIN',
+  enterPinToAccess: 'Ange din PIN-kod för att komma åt denna funktion',
+  createNewPin: 'Skapa en ny 4-siffrig PIN-kod',
+  confirmYourPin: 'Bekräfta din 4-siffriga PIN-kod',
+  invalidPin: 'Ogiltig PIN-kod. Måste vara 4 siffror.',
+  pinSet: 'PIN-kod inställd',
+  pinSetSuccessfully: 'Din säkerhets-PIN har ställts in',
+  failedToSetPin: 'Kunde inte ställa in PIN-kod',
+  incorrectPin: 'Felaktig PIN-kod. Försök igen.',
+  securityVerification: 'Säkerhetsverifiering',
+  enterPinToSaveSettings: 'Ange din PIN-kod för att spara säkerhetsinställningar',
+  securityPin: 'Säkerhets-PIN',
+  changePinDesc: 'Ändra din säkerhets-PIN',
+  setupPinDesc: 'Ställ in en PIN-kod för extra säkerhet'
 };
+
+export default swedish;

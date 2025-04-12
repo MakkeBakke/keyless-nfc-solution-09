@@ -266,7 +266,9 @@ export type TranslationKey =
   | "enterPinToSaveSettings"
   | "securityPin"
   | "changePinDesc"
-  | "setupPinDesc";
+  | "setupPinDesc"
+  | "edit"
+  | "success";
 
 const translations = {
   english,
