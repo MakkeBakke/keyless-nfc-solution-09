@@ -28,8 +28,8 @@ export const PinSecurityProvider: React.FC<{ children: React.ReactNode }> = ({ c
     // Load PIN from localStorage on initial load
     const loadPin = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-        const userId = session?.user?.id || 'demo-user';
+        const { data } = await supabase.auth.getSession();
+        const userId = data.session?.user?.id || 'demo-user';
         const storedPin = localStorage.getItem(`${PIN_KEY}_${userId}`);
         
         if (storedPin) {
@@ -44,7 +44,7 @@ export const PinSecurityProvider: React.FC<{ children: React.ReactNode }> = ({ c
     loadPin();
   }, []);
   
-  const setPin = (newPin: string) => {
+  const setPin = async (newPin: string) => {
     if (newPin.length !== 4 || !/^\d+$/.test(newPin)) {
       toast({
         title: t('error'),
@@ -55,8 +55,8 @@ export const PinSecurityProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }
     
     try {
-      const { data: { session } } = supabase.auth.getSession();
-      const userId = session?.user?.id || 'demo-user';
+      const { data } = await supabase.auth.getSession();
+      const userId = data.session?.user?.id || 'demo-user';
       localStorage.setItem(`${PIN_KEY}_${userId}`, newPin);
       setStoredPin(newPin);
       setIsPinSet(true);

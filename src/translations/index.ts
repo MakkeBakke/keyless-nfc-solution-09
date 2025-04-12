@@ -1,10 +1,14 @@
 
-import { english } from './english';
+import english from './english';
 import swedish from './swedish';
 import chinese from './chinese';
 import spanish from './spanish';
 import german from './german';
 import russian from './russian';
+
+export type TranslationDefinition = {
+  [key in TranslationKey]: string;
+};
 
 export type TranslationKey =
   | 'home'
@@ -200,11 +204,6 @@ export type TranslationKey =
   | "failedToSaveNotificationSettings"
   | "failedToLoadNotificationSettings"
   | "notificationSettings"
-  | "autoLock"
-  | "autoLockDescription"
-  | "autoLockDelay"
-  | "geofencing"
-  | "geofencingDescription"
   | "twoFactorAuth"
   | "twoFactorAuthDescription"
   | "historyRetention"
@@ -246,10 +245,28 @@ export type TranslationKey =
   | "toGetStarted"
   | "openApp"
   | "permissionsAddedButEmailFailed"
-  // Add the missing translation keys
+  // Verification and PIN related translation keys
   | "verificationFailed"
-  | "tryAgainPlacingPhone"
-  | "unlockFailed";
+  | "tryAgainPlacingPhone" 
+  | "unlockFailed"
+  | "pinsDontMatch"
+  | "enterSecurityPin"
+  | "createSecurityPin"
+  | "confirmSecurityPin"
+  | "enterPinToAccess"
+  | "createNewPin"
+  | "confirmYourPin"
+  | "invalidPin"
+  | "pinSet"
+  | "pinSetSuccessfully"
+  | "failedToSetPin"
+  | "incorrectPin"
+  | "securityVerification"
+  | "enterPinToDeleteKey"
+  | "enterPinToSaveSettings"
+  | "securityPin"
+  | "changePinDesc"
+  | "setupPinDesc";
 
 const translations = {
   english,

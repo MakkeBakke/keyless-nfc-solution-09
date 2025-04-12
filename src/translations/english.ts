@@ -1,3 +1,4 @@
+
 import { TranslationDefinition } from '.';
 
 const english: TranslationDefinition = {
@@ -214,12 +215,6 @@ const english: TranslationDefinition = {
   failedToLoadNotificationSettings: 'Failed to load notification settings',
   
   // Key Security
-  autoLock: 'Auto Lock',
-  autoLockDescription: 'Automatically lock the door after it has been unlocked',
-  autoLockDelay: 'Auto Lock Delay',
-  minutes: 'minutes',
-  geofencing: 'Geofencing',
-  geofencingDescription: 'Lock/unlock automatically based on your location',
   twoFactorAuth: 'Two-Factor Authentication',
   twoFactorAuthDescription: 'Require a second form of verification',
   historyRetention: 'History Retention',
@@ -279,7 +274,27 @@ const english: TranslationDefinition = {
   // New error messages for NFC verification
   verificationFailed: 'Verification Failed',
   tryAgainPlacingPhone: 'Please try again by placing your phone closer to the reader',
-  unlockFailed: 'Unlock Failed'
+  unlockFailed: 'Unlock Failed',
+  
+  // PIN Security related translations
+  pinsDontMatch: 'PINs do not match. Please try again.',
+  enterSecurityPin: 'Enter Security PIN',
+  createSecurityPin: 'Create Security PIN',
+  confirmSecurityPin: 'Confirm Security PIN',
+  enterPinToAccess: 'Enter your PIN to access this feature',
+  createNewPin: 'Create a new 4-digit PIN',
+  confirmYourPin: 'Confirm your 4-digit PIN',
+  invalidPin: 'Invalid PIN. Must be 4 digits.',
+  pinSet: 'PIN Set',
+  pinSetSuccessfully: 'Your security PIN has been set successfully',
+  failedToSetPin: 'Failed to set PIN',
+  incorrectPin: 'Incorrect PIN. Please try again.',
+  securityVerification: 'Security Verification',
+  enterPinToDeleteKey: 'Enter your PIN to delete this key',
+  enterPinToSaveSettings: 'Enter your PIN to save security settings',
+  securityPin: 'Security PIN',
+  changePinDesc: 'Change your security PIN',
+  setupPinDesc: 'Set up a PIN for additional security'
 };
 
 export default english;

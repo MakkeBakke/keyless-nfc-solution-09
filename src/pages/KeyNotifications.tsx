@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Bell, ChevronRight, ArrowLeft } from 'lucide-react';
+import { BellRing, ChevronRight, ArrowLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Switch } from '@/components/ui/switch';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,70 @@ import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
-import { KeyNotificationSettings, getNotificationSettings, saveNotificationSettings } from '@/utils/localStorageUtils';
+
+type KeyNotificationSettings = {
+  key_id: string;
+  user_id: string;
+  all_activity: boolean;
+  unlock_events: boolean;
+  lock_events: boolean;
+  permission_changes: boolean;
+  low_battery: boolean;
+  unlock_attempts: boolean;
+  security_alerts: boolean;
+  access_requests: boolean;
+}
+
+const getNotificationSettings = (keyId: string, userId: string): KeyNotificationSettings => {
+  try {
+    const key = `notification_settings_${keyId}_${userId}`;
+    const storedSettings = localStorage.getItem(key);
+    
+    if (storedSettings) {
+      return JSON.parse(storedSettings);
+    }
+    
+    // Default settings
+    return {
+      key_id: keyId,
+      user_id: userId,
+      all_activity: true,
+      unlock_events: true,
+      lock_events: true,
+      permission_changes: false,
+      low_battery: true,
+      unlock_attempts: true,
+      security_alerts: true,
+      access_requests: false,
+    };
+  } catch (error) {
+    console.error('Error getting notification settings:', error);
+    
+    // Fallback default settings
+    return {
+      key_id: keyId,
+      user_id: userId,
+      all_activity: true,
+      unlock_events: true,
+      lock_events: true,
+      permission_changes: false,
+      low_battery: true,
+      unlock_attempts: true,
+      security_alerts: true,
+      access_requests: false,
+    };
+  }
+};
+
+const saveNotificationSettings = (settings: KeyNotificationSettings): void => {
+  try {
+    const key = `notification_settings_${settings.key_id}_${settings.user_id}`;
+    localStorage.setItem(key, JSON.stringify(settings));
+  } catch (error) {
+    console.error('Error saving notification settings:', error);
+    throw error;
+  }
+};
 
 const KeyNotifications = () => {
   const { id } = useParams<{ id: string }>();
