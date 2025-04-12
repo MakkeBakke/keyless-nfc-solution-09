@@ -273,14 +273,23 @@ export type TranslationKey =
   | "signedOut"
   | "signedIn"
   | "notificationsSetting"
-  | "addDigitalKey"  // Added addDigitalKey translation key
+  | "addDigitalKey"
   | "enterKeyName"
   | "selectKeyType"
   | "smartLock"
   | "digitalCard"
   | "car"
   | "office"
-  | "other";
+  | "other"
+  | "keyDetails"
+  | "general"
+  | "keyNameLabel"
+  | "keyTypeLabel"
+  | "lastUsedLabel"
+  | "configureNFC"
+  | "notificationsSettings"
+  | "enableNotifications"
+  | "activityHistory";
 
 const translations = {
   english,
