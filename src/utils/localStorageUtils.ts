@@ -1,3 +1,5 @@
+
+// Define interfaces and types
 export interface KeySecuritySettings {
   key_id: string;
   user_id: string;
@@ -8,6 +10,8 @@ export interface KeySecuritySettings {
 }
 
 export type KeyNotificationSettings = {
+  keyId: string;
+  userId: string;
   all_activity: boolean;
   unlock_events: boolean;
   lock_events: boolean;
@@ -16,8 +20,6 @@ export type KeyNotificationSettings = {
   attempts_to_unlock: boolean;
   security_alerts: boolean;
   access_requests: boolean;
-  userId: string;
-  keyId: string;
 };
 
 export interface ReadNotificationsStore {
@@ -25,6 +27,7 @@ export interface ReadNotificationsStore {
   readIds: string[];
 }
 
+// Security settings utils
 export const getSecuritySettings = (keyId: string, userId: string): KeySecuritySettings => {
   try {
     const key = `security_settings_${keyId}_${userId}`;
@@ -68,6 +71,7 @@ export const saveSecuritySettings = (settings: KeySecuritySettings): void => {
   }
 };
 
+// Read notifications utils
 export const getReadNotifications = (userId: string): string[] => {
   try {
     const key = `read_notifications_${userId}`;

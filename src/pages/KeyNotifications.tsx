@@ -1,88 +1,29 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { BellRing, ChevronRight, ArrowLeft } from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { Switch } from '@/components/ui/switch';
-import { Button } from '@/components/ui/button';
-import { toast } from '@/hooks/use-toast';
 import { motion } from 'framer-motion';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import Header from '@/components/Header';
-
-type KeyNotificationSettings = {
-  key_id: string;
-  user_id: string;
-  all_activity: boolean;
-  unlock_events: boolean;
-  lock_events: boolean;
-  permission_changes: boolean;
-  low_battery: boolean;
-  unlock_attempts: boolean;
-  security_alerts: boolean;
-  access_requests: boolean;
-}
-
-const getNotificationSettings = (keyId: string, userId: string): KeyNotificationSettings => {
-  try {
-    const key = `notification_settings_${keyId}_${userId}`;
-    const storedSettings = localStorage.getItem(key);
-    
-    if (storedSettings) {
-      return JSON.parse(storedSettings);
-    }
-    
-    // Default settings
-    return {
-      key_id: keyId,
-      user_id: userId,
-      all_activity: true,
-      unlock_events: true,
-      lock_events: true,
-      permission_changes: false,
-      low_battery: true,
-      unlock_attempts: true,
-      security_alerts: true,
-      access_requests: false,
-    };
-  } catch (error) {
-    console.error('Error getting notification settings:', error);
-    
-    // Fallback default settings
-    return {
-      key_id: keyId,
-      user_id: userId,
-      all_activity: true,
-      unlock_events: true,
-      lock_events: true,
-      permission_changes: false,
-      low_battery: true,
-      unlock_attempts: true,
-      security_alerts: true,
-      access_requests: false,
-    };
-  }
-};
-
-const saveNotificationSettings = (settings: KeyNotificationSettings): void => {
-  try {
-    const key = `notification_settings_${settings.key_id}_${settings.user_id}`;
-    localStorage.setItem(key, JSON.stringify(settings));
-  } catch (error) {
-    console.error('Error saving notification settings:', error);
-    throw error;
-  }
-};
+import KeyNotificationSettingsPanel from '@/components/notifications/KeyNotificationSettings';
+import { useKeyNotifications } from '@/hooks/useKeyNotifications';
 
 const KeyNotifications = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { t } = useLanguage();
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-  const [keyData, setKeyData] = useState<any>(null);
-  const [notificationSettings, setNotificationSettings] = useState<KeyNotificationSettings | null>(null);
   const [userId, setUserId] = useState<string | null>(null);
+
+  // Using our custom hook for key notification settings
+  const {
+    keyData,
+    loading,
+    saving,
+    notificationSettings,
+    handleSaveSettings,
+    handleToggleChange
+  } = useKeyNotifications(id, userId);
 
   useEffect(() => {
     // Check if user is authenticated
@@ -99,86 +40,6 @@ const KeyNotifications = () => {
     
     checkSession();
   }, []);
-
-  useEffect(() => {
-    if (!id || !userId) return;
-    
-    const fetchKeyData = async () => {
-      setLoading(true);
-      
-      try {
-        // Fetch key data from database
-        const { data, error } = await supabase
-          .from('keys')
-          .select('*')
-          .eq('id', id)
-          .single();
-        
-        if (error) {
-          // For demo, provide mock data if there's an error
-          setKeyData({
-            id,
-            name: 'Demo Key',
-            type: 'Smart Lock',
-            battery_level: 75,
-            is_active: true,
-            is_locked: true
-          });
-        } else {
-          setKeyData(data);
-        }
-        
-        // Get notification settings from local storage
-        const settings = getNotificationSettings(id, userId);
-        setNotificationSettings(settings);
-      } catch (error) {
-        console.error('Error:', error);
-        toast({
-          title: t('error'),
-          description: t('failedToLoadNotificationSettings'),
-          variant: "destructive",
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
-    fetchKeyData();
-  }, [id, userId, t]);
-  
-  const handleSaveSettings = async () => {
-    if (!notificationSettings) return;
-    
-    setSaving(true);
-    
-    try {
-      // Save to localStorage
-      saveNotificationSettings(notificationSettings);
-      
-      toast({
-        title: t('settingsSaved'),
-        description: t('notificationSettingsUpdated'),
-      });
-    } catch (error) {
-      console.error('Error saving settings:', error);
-      toast({
-        title: t('error'),
-        description: t('failedToSaveNotificationSettings'),
-        variant: "destructive",
-      });
-    } finally {
-      setSaving(false);
-    }
-  };
-  
-  const handleToggleChange = (field: keyof KeyNotificationSettings, checked: boolean) => {
-    if (!notificationSettings) return;
-    
-    setNotificationSettings({
-      ...notificationSettings,
-      [field]: checked
-    });
-  };
 
   if (loading) {
     return (
@@ -226,127 +87,12 @@ const KeyNotifications = () => {
           <p className="text-axiv-gray dark:text-gray-400 mb-4">{t('notificationSettings')}</p>
         </div>
         
-        <div className="glass-card mb-4 p-0 overflow-hidden dark:bg-gray-800 dark:border-gray-700">
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('allActivity')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('allActivityDescription')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.all_activity || false}
-                onCheckedChange={(checked) => handleToggleChange('all_activity', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('unlockEvents')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('receiveNotificationWhenKeyIsUnlocked')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.unlock_events || false}
-                onCheckedChange={(checked) => handleToggleChange('unlock_events', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('lockEvents')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('receiveNotificationWhenKeyIsLocked')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.lock_events || false}
-                onCheckedChange={(checked) => handleToggleChange('lock_events', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('permissionChanges')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('notifyWhenPermissionChanges')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.permission_changes || false}
-                onCheckedChange={(checked) => handleToggleChange('permission_changes', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('lowBattery')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('notifyWhenBatteryIsLow')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.low_battery || false}
-                onCheckedChange={(checked) => handleToggleChange('low_battery', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('attemptsToUnlock')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('notifyOnFailedUnlockAttempts')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.unlock_attempts || false}
-                onCheckedChange={(checked) => handleToggleChange('unlock_attempts', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('securityAlerts')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('receiveImportantSecurityAlerts')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.security_alerts || false}
-                onCheckedChange={(checked) => handleToggleChange('security_alerts', checked)}
-              />
-            </div>
-          </div>
-          
-          <div className="p-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-medium dark:text-white">{t('accessRequests')}</h3>
-                <p className="text-sm text-axiv-gray dark:text-gray-400 mt-1">
-                  {t('notifyWhenSomeoneRequestsAccess')}
-                </p>
-              </div>
-              <Switch 
-                checked={notificationSettings?.access_requests || false}
-                onCheckedChange={(checked) => handleToggleChange('access_requests', checked)}
-              />
-            </div>
-          </div>
-        </div>
+        {notificationSettings && (
+          <KeyNotificationSettingsPanel 
+            settings={notificationSettings}
+            onToggleChange={handleToggleChange}
+          />
+        )}
         
         <div className="flex justify-end">
           <Button 
