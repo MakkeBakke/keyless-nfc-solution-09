@@ -272,7 +272,15 @@ export type TranslationKey =
   | "updateProfile"
   | "signedOut"
   | "signedIn"
-  | "notificationsSetting"; // Added notificationsSetting translation key
+  | "notificationsSetting"
+  | "addDigitalKey"  // Added addDigitalKey translation key
+  | "enterKeyName"
+  | "selectKeyType"
+  | "smartLock"
+  | "digitalCard"
+  | "car"
+  | "office"
+  | "other";
 
 const translations = {
   english,
